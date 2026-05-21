@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Edit Package - Admin Panel{% endblock %}
+{% block page_title %}Edit Package{% endblock %}
+
+{% block content %}
+<div class="form-container">
+	<form method="post">
+		<div class="row g-3">
+			<div class="col-md-6">
+				<label class="form-label">Name</label>
+				<input type="text" name="name" class="form-control" value="{{ package.name }}" required />
+			</div>
+			<div class="col-md-6">
+				<label class="form-label">Price</label>
+				<input type="number" name="price" class="form-control" value="{{ package.price }}" step="0.01" required />
+			</div>
+			<div class="col-md-6">
+				<label class="form-label">Daily Return Rate (%)</label>
+				<input type="number" name="daily_return_rate" class="form-control" value="{{ package.daily_return_rate }}" step="0.01" required />
+			</div>
+			<div class="col-md-6">
+				<label class="form-label">Duration (days)</label>
+				<input type="number" name="duration_days" class="form-control" value="{{ package.duration_days }}" required />
+			</div>
+			<div class="col-12">
+				<label class="form-label">Description</label>
+				<textarea name="description" class="form-control" rows="4">{{ package.description }}</textarea>
+			</div>
+		</div>
+		<div class="mt-3 d-flex gap-2">
+			<a href="{{ url_for('admin.packages') }}" class="btn btn-secondary">Cancel</a>
+			<button type="submit" class="btn btn-primary">Save Changes</button>
+		</div>
+	</form>
+</div>
+{% endblock %}

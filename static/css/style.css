@@ -1,0 +1,259 @@
+/* Custom CSS for Fintech Finance */
+
+:root {
+    --primary-color: #22C55E;
+    --primary-dark: #16A34A;
+    --primary-light: #DCFCE7;
+    --secondary-color: #6c757d;
+    --success-color: #2E7D32;
+    --success-light: #4CAF50;
+    --info-color: #22C55E;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #F8F7F5;
+    --very-light: #FDFCFA;
+    --dark-color: #212529;
+    --green-accent: #2E7D32;
+    --green-light: #E8F5E9;
+}
+
+body {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--dark-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+}
+
+/* Custom navbar styling */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #ffffff;
+}
+
+/* Card customization */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 15px;
+    font-weight: 600;
+}
+
+/* Package cards */
+.package-card {
+    height: 100%;
+}
+
+.package-card .card-header {
+    text-align: center;
+}
+
+.package-card .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-shadow: 0 1px 2px rgba(212, 175, 55, 0.2);
+}
+
+.package-card .daily-income {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--green-accent);
+}
+
+/* Dashboard statistics cards */
+.stat-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.stat-card .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.stat-card .stat-label {
+    font-size: 1rem;
+    color: var(--secondary-color);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Timer countdown */
+.countdown-timer {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Referral section */
+.referral-link {
+    background-color: var(--light-color);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.referral-code {
+    font-weight: 700;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+}
+
+/* Tables */
+.table th {
+    background-color: var(--light-blue);
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+/* Transaction badges */
+.badge.bg-deposit {
+    background-color: var(--success-color);
+}
+
+.badge.bg-income {
+    background-color: var(--info-color);
+}
+
+.badge.bg-bonus {
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.badge.bg-referral {
+    background-color: var(--primary-color);
+}
+
+.badge.bg-withdrawal {
+    background-color: var(--secondary-color);
+}
+
+/* Status badges */
+.badge.bg-pending {
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.badge.bg-completed {
+    background-color: var(--success-color);
+}
+
+.badge.bg-rejected {
+    background-color: var(--danger-color);
+}
+
+/* Auth pages */
+.auth-card {
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+/* Profile section */
+.profile-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 30px 0;
+    margin-bottom: 30px;
+    border-radius: 10px;
+}
+
+.profile-header h2 {
+    margin-bottom: 0;
+}
+
+/* Footer styling */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 40px 0 20px;
+}
+
+footer a {
+    color: var(--light-color);
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 20px;
+    }
+    
+    .package-card {
+        margin-bottom: 20px;
+    }
+}
+
+/* Animation for loader */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}

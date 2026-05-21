@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+  <!-- Background pill -->
+  <rect rx="8" ry="8" width="200" height="50" fill="none"/>
+  <!-- Icon circle -->
+  <circle cx="25" cy="25" r="21" fill="#1a3c6e"/>
+  <!-- Chart bars icon -->
+  <rect x="13" y="28" width="5" height="10" rx="1" fill="white"/>
+  <rect x="21" y="22" width="5" height="16" rx="1" fill="white"/>
+  <rect x="29" y="16" width="5" height="22" rx="1" fill="white"/>
+  <!-- Upward arrow on top bar -->
+  <polyline points="31.5,14 31.5,10 35.5,14" fill="none" stroke="#f0c040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Site name text -->
+  <text x="54" y="20" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="16" fill="#1a3c6e" letter-spacing="0.5">Sonic</text>
+  <text x="54" y="38" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="16" fill="#f0c040" letter-spacing="0.5">Pay</text>
+</svg>

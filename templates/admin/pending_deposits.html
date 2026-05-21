@@ -1,0 +1,447 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Pending Deposits{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0"><i class="fas fa-clock"></i> Pending Deposit Requests</h2>
+            <p class="text-muted">Review and approve/reject user deposit requests</p>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div id="alertSuccess" class="alert alert-success alert-dismissible fade show" style="display: none;">
+        <i class="fas fa-check-circle"></i>
+        <span id="successMessage"></span>
+        <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
+    </div>
+    <div id="alertError" class="alert alert-danger alert-dismissible fade show" style="display: none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="errorMessage"></span>
+        <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-hourglass-half"></i> Pending Deposits</h5>
+                    <h2 class="mb-0">{{ deposits|length }}</h2>
+                    <small>Awaiting approval</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-receipt"></i> Receipts Uploaded</h5>
+                    <h2 class="mb-0">{{ deposits|length }}</h2>
+                    <small>Awaiting amount verification</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white" style="background: linear-gradient(135deg, #D4AF37, #B8941E);">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-tasks"></i> Action Required</h5>
+                    <h2 class="mb-0">{{ deposits|length }}</h2>
+                    <small>Requests to process</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposits Table -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Deposit Requests</h5>
+        </div>
+        <div class="card-body">
+            {% if deposits %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Reference</th>
+                            <th>Receipt</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deposit in deposits %}
+                        <tr id="deposit-{{ deposit.id }}">
+                            <td><strong>#{{ deposit.id }}</strong></td>
+                            <td>
+                                <div>
+                                    <strong>{{ deposit.name }}</strong>
+                                    <br><small class="text-muted">{{ deposit.email }}</small>
+                                    {% if deposit.phone %}
+                                    <br><small class="text-muted"><i class="fas fa-phone"></i> {{ deposit.phone }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if deposit.amount > 0 %}
+                                <strong class="text-success">₦{{ "{:,.0f}".format(deposit.amount) }}</strong>
+                                {% else %}
+                                <span class="badge bg-secondary">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <code>{{ deposit.reference }}</code>
+                            </td>
+                            <td>
+                                {% set receipt_filename = deposit.description.split('Receipt: ')[-1] if 'Receipt:' in deposit.description else '' %}
+                                {% if receipt_filename %}
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary"
+                                        onclick="viewReceiptModal({{ deposit.id }})">
+                                    <i class="fas fa-file-image"></i> View Receipt
+                                </button>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ deposit.created_at }}</small>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-success" 
+                                        onclick="showApproveModal({{ deposit.id }})">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="showRejectModal({{ deposit.id }})">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h4>No Pending Deposits</h4>
+                <p class="text-muted">All deposit requests have been processed</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-check-circle"></i> Approve Deposit</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Enter the deposit amount from the receipt:</p>
+                <div class="form-group">
+                    <label for="depositAmount">Amount (₦):</label>
+                    <input type="number" 
+                           class="form-control" 
+                           id="depositAmount" 
+                           min="1" 
+                           step="0.01"
+                           placeholder="Enter amount from receipt"
+                           required>
+                    <small class="text-muted">This amount will be credited to the user's balance</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmApprove()">
+                    <i class="fas fa-check"></i> Approve & Credit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-times-circle"></i> Reject Deposit</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reject this deposit request?</p>
+                <div class="form-group">
+                    <label for="rejectReason">Reason for rejection:</label>
+                    <textarea class="form-control" id="rejectReason" rows="3" 
+                              placeholder="Enter reason (will be shown to user)"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmReject()">
+                    <i class="fas fa-times"></i> Reject Deposit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-receipt"></i> Deposit Receipt</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="receiptModalBody" style="max-height: 70vh; overflow-y: auto;">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="downloadReceiptBtn" href="#" class="btn btn-primary" target="_blank">
+                    <i class="fas fa-download"></i> Download Receipt
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentDepositId = null;
+
+function showAlert(type, message) {
+    const alertSuccess = document.getElementById('alertSuccess');
+    const alertError = document.getElementById('alertError');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+
+    alertSuccess.style.display = 'none';
+    alertError.style.display = 'none';
+
+    if (type === 'success') {
+        successMessage.textContent = message;
+        alertSuccess.style.display = 'block';
+        setTimeout(() => alertSuccess.style.display= 'none', 5000);
+    } else {
+        errorMessage.textContent = message;
+        alertError.style.display = 'block';
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showApproveModal(depositId) {
+    currentDepositId = depositId;
+    document.getElementById('depositAmount').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('approveModal'));
+    modal.show();
+}
+
+function confirmApprove() {
+    const amount = parseFloat(document.getElementById('depositAmount').value);
+    
+    if (!amount || amount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+    }
+
+    fetch(`{{ url_for('admin.approve_deposit', transaction_id=0) }}`.replace('/0', `/${currentDepositId}`), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ amount: amount })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('approveModal')).hide();
+            
+            showAlert('success', data.message);
+            // Remove the row from table
+            document.getElementById(`deposit-${currentDepositId}`).remove();
+            
+            // Reload page after 2 seconds to update statistics
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(error => {
+        showAlert('error', 'An error occurred. Please try again.');
+    });
+}
+
+function showRejectModal(depositId) {
+    currentDepositId = depositId;
+    const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+    modal.show();
+}
+
+function confirmReject() {
+    const reason = document.getElementById('rejectReason').value.trim();
+    
+    if (!reason) {
+        alert('Please provide a reason for rejection');
+        return;
+    }
+
+    fetch(`{{ url_for('admin.reject_deposit', transaction_id=0) }}`.replace('/0', `/${currentDepositId}`), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide();
+            
+            showAlert('success', data.message);
+            // Remove the row from table
+            document.getElementById(`deposit-${currentDepositId}`).remove();
+            
+            // Reload page after 2 seconds
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(error => {
+        showAlert('error', 'An error occurred. Please try again.');
+    });
+}
+
+function viewReceiptModal(transactionId) {
+    const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+    modal.show();
+
+    // Fetch receipt data
+    fetch(`{{ url_for('admin.get_receipt_data', transaction_id=0) }}`.replace('/0', `/${transactionId}`))
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const receiptHtml = `
+                <div class="receipt-details">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h6 class="text-muted">User Name</h6>
+                            <p><strong>${data.user_name}</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted">Transaction ID</h6>
+                            <p><strong>#${data.transaction_id}</strong></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h6 class="text-muted">Email</h6>
+                            <p><strong>${data.user_email}</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted">Phone</h6>
+                            <p><strong>${data.user_phone || 'N/A'}</strong></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h6 class="text-muted">Amount</h6>
+                            <p><strong class="text-success">₦${(data.amount || 0).toLocaleString('en-NG')}</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted">Reference</h6>
+                            <p><code>${data.reference}</code></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h6 class="text-muted">Status</h6>
+                            <p><span class="badge bg-${data.status === 'completed' ? 'success' : data.status === 'pending' ? 'warning' : 'danger'}">${data.status.toUpperCase()}</span></p>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted">Date</h6>
+                            <p><small>${new Date(data.created_at).toLocaleString('en-NG')}</small></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Receipt Image</h6>
+                        ${data.receipt_filename ? `
+                            <img src="{{ url_for('static', filename='uploads/receipts/') }}${data.receipt_filename}" 
+                                 class="img-fluid" 
+                                 style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                        ` : `
+                            <p class="text-muted">No receipt image available</p>
+                        `}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('receiptModalBody').innerHTML = receiptHtml;
+            
+            // Update download button
+            if (data.receipt_filename) {
+                document.getElementById('downloadReceiptBtn').href = `{{ url_for('static', filename='uploads/receipts/') }}${data.receipt_filename}`;
+                document.getElementById('downloadReceiptBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('downloadReceiptBtn').style.display = 'none';
+            }
+        } else {
+            document.getElementById('receiptModalBody').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> ${data.message || 'Failed to load receipt'}
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        document.getElementById('receiptModalBody').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> An error occurred while loading the receipt
+            </div>
+        `;
+    });
+}
+</script>
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+code {
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

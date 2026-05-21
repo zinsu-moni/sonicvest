@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SONICVEST</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(180deg, #071E16 0%, #0B3D2E 40%, #F8FAF8 40%);
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            color: white;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-greeting {
+            font-size: 14px;
+            opacity: 0.85;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .header-username {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Card */
+        .hero-card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(7,30,22,0.15);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            border-radius: 18px;
+            padding: 28px;
+            color: white;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(167,243,208,0.2) 0%, transparent 70%);
+            border-radius: 999px;
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-label {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .hero-price {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .hero-price-currency {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .hero-price-value {
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #F8FAF8;
+            border-radius: 16px;
+            padding: 18px 14px;
+            text-align: center;
+            border: 1px solid #E4EBE4;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(7,30,22,0.08);
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 900;
+            color: #0B3D2E;
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #6B7A6B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .action-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 8px 24px rgba(11,61,46,0.25);
+        }
+
+        .action-item:hover .action-icon {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(11,61,46,0.35);
+        }
+
+        .action-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #142114;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #142114;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-link {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0B6B4E;
+            text-decoration: none;
+        }
+
+        /* Package Card */
+        .package-card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(7,30,22,0.06);
+            border: 1px solid #E4EBE4;
+        }
+
+        .package-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .package-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #A7F3D0 0%, #6EE7B7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #0B3D2E;
+        }
+
+        .package-info h4 {
+            font-size: 16px;
+            font-weight: 800;
+            color: #142114;
+            margin-bottom: 2px;
+            letter-spacing: -0.02em;
+        }
+
+        .package-info p {
+            font-size: 13px;
+            color: #6B7A6B;
+        }
+
+        .package-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .package-meta-item {
+            text-align: center;
+            padding: 12px;
+            background: #F8FAF8;
+            border-radius: 12px;
+        }
+
+        .package-meta-value {
+            font-size: 15px;
+            font-weight: 900;
+            color: #0B3D2E;
+            margin-bottom: 2px;
+        }
+
+        .package-meta-label {
+            font-size: 11px;
+            color: #6B7A6B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .package-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(11,61,46,0.2);
+        }
+
+        .package-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(11,61,46,0.3);
+        }
+
+        /* Notifications */
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .notification-item {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(7,30,22,0.04);
+            border: 1px solid #E4EBE4;
+            display: flex;
+            gap: 14px;
+        }
+
+        .notification-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #ECFDF3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #059669;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #142114;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 13px;
+            color: #6B7A6B;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 16px 24px;
+            box-shadow: 0 -8px 32px rgba(7,30,22,0.12);
+            z-index: 1000;
+            border-top: 1px solid rgba(7,30,22,0.08);
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #9CA69C;
+            padding: 8px 16px;
+            border-radius: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: #0B3D2E;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <span class="header-greeting">Good {{ 'Morning' if now.hour < 12 else 'Afternoon' if now.hour < 17 else 'Evening' }},</span>
+                <span class="header-username">{{ user.name or 'User' }}</span>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <a href="{{ url_for('profile') }}" class="header-btn" title="Profile">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Hero Card -->
+        <div class="hero-card">
+            <div class="hero-gradient">
+                <div class="hero-top">
+                    <div>
+                        <div class="hero-title">Total Balance</div>
+                        <div class="hero-subtitle">Account Overview</div>
+                    </div>
+                    <div class="hero-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="hero-bottom">
+                    <span class="hero-label">Available to invest</span>
+                    <div class="hero-price">
+                        <span class="hero-price-currency">₦</span>
+                        <span class="hero-price-value">{{ (user.balance or 0) | format_number }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">₦{{ (user.recharge_balance or 0) | format_number }}</div>
+                    <div class="stat-label">Recharge</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">₦{{ (user.main_balance or 0) | format_number }}</div>
+                    <div class="stat-label">Main</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">₦{{ (user.profit or 0) | format_number }}</div>
+                    <div class="stat-label">Profit</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions-grid">
+            <a href="{{ url_for('deposit') }}" class="action-item">
+                <div class="action-icon">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <span class="action-label">Deposit</span>
+            </a>
+            <a href="{{ url_for('withdrawal') }}" class="action-item">
+                <div class="action-icon">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <span class="action-label">Withdraw</span>
+            </a>
+            <a href="{{ url_for('packages') }}" class="action-item">
+                <div class="action-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <span class="action-label">Plans</span>
+            </a>
+            <a href="{{ url_for('referral') }}" class="action-item">
+                <div class="action-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span class="action-label">Team</span>
+            </a>
+        </div>
+
+        <!-- Featured Package -->
+        {% if packages %}
+        <div class="section-title">
+            <span>Featured Plan</span>
+            <a href="{{ url_for('packages') }}" class="section-link">View all</a>
+        </div>
+        <div class="package-card">
+            <div class="package-header">
+                <div class="package-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="package-info">
+                    <h4>{{ packages[0].name }}</h4>
+                    <p>₦{{ packages[0].price | format_number }}</p>
+                </div>
+            </div>
+            <div class="package-meta">
+                <div class="package-meta-item">
+                    <div class="package-meta-value">{{ packages[0].duration }}</div>
+                    <div class="package-meta-label">Cycle</div>
+                </div>
+                <div class="package-meta-item">
+                    <div class="package-meta-value">{{ packages[0].daily_interest }}%</div>
+                    <div class="package-meta-label">Daily</div>
+                </div>
+                <div class="package-meta-item">
+                    <div class="package-meta-value">{{ packages[0].total_interest }}%</div>
+                    <div class="package-meta-label">Total</div>
+                </div>
+            </div>
+            <a href="{{ url_for('package_details', package_id=packages[0].id) }}" class="package-btn">
+                Invest Now
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Recent Transactions -->
+        {% if recent_transactions %}
+        <div class="section-title">
+            <span>Recent Activity</span>
+            <a href="{{ url_for('transactions') }}" class="section-link">View all</a>
+        </div>
+        <div class="notifications-list">
+            {% for transaction in recent_transactions[:3] %}
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-{{ 'arrow-down' if transaction.type in ['deposit', 'package_income', 'daily_bonus', 'referral_bonus'] else 'arrow-up' }}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">{{ transaction.type.replace('_', ' ').title() }}</div>
+                    <div class="notification-message">
+                        {{ transaction.type.title() }} ₦{{ transaction.amount | format_number }}
+                        {% if transaction.type in ['deposit', 'package_income', 'daily_bonus', 'referral_bonus'] %}successfully{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-items">
+            <a href="{{ url_for('dashboard') }}" class="nav-item active">
+                <i class="fas fa-home nav-icon"></i>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="{{ url_for('packages') }}" class="nav-item">
+                <i class="fas fa-box nav-icon"></i>
+                <span class="nav-label">Plans</span>
+            </a>
+            <a href="{{ url_for('referral') }}" class="nav-item">
+                <i class="fas fa-users nav-icon"></i>
+                <span class="nav-label">Team</span>
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span class="nav-label">Profile</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+MAX WEALTH - WITHDRAWAL APPROVED ✓
+==============================================
+
+Hello {{ name }},
+
+Great news! Your withdrawal has been approved and processed!
+
+WITHDRAWAL DETAILS:
+- Withdrawal Amount: ₦{{ amount }}
+- Net Amount (after fee): ₦{{ net_amount }}
+- Bank Name: {{ bank_name }}
+- Account Number: {{ account_number }}
+- Approval Date: {{ approval_date }}
+
+TRANSFER TIMELINE:
+- Status: Processing for bank transfer
+- Expected arrival: 24-48 hours (depending on your bank)
+- Trace ID: {{ trace_id }}
+
+Your funds should arrive in your bank account within 24-48 hours. Please allow additional time during weekends or bank holidays.
+
+View your dashboard: {{ dashboard_url }}
+
+IMPORTANT:
+If you do not receive the funds within 48 hours, please contact support immediately.
+
+---
+Registered email: {{ email }}
+Need help? support@maxwealth.com

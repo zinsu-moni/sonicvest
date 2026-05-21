@@ -1,0 +1,191 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<!-- Stats Cards -->
+	<div class="row g-3 mb-4">
+		<div class="col-md-3">
+			<div class="stats-card">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<div class="text-muted">Total Users</div>
+						<h3 class="text-primary">{{ stats.total_users or 0 }}</h3>
+					</div>
+					<i class="fas fa-users fa-2x text-primary"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="stats-card">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<div class="text-muted">Total Deposits</div>
+						<h3 class="text-success">₦{{ (stats.total_deposits or 0)|round(2) }}</h3>
+					</div>
+					<i class="fas fa-arrow-down fa-2x text-success"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="stats-card">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<div class="text-muted">Total Withdrawals</div>
+						<h3 class="text-info">₦{{ (stats.total_withdrawals or 0)|round(2) }}</h3>
+					</div>
+					<i class="fas fa-arrow-up fa-2x text-info"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="stats-card">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<div class="text-muted">Pending Withdrawals</div>
+						<h3 class="text-warning">{{ stats.pending_withdrawals or 0 }}</h3>
+					</div>
+					<i class="fas fa-clock fa-2x text-warning"></i>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row g-4">
+		<!-- Recent Users -->
+		<div class="col-lg-6">
+			<div class="table-container">
+				<h5 class="mb-3">Recent Users</h5>
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Username</th>
+								<th>Email</th>
+								<th>Registered</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for user in recent_users %}
+							<tr>
+								<td>{{ user.username }}</td>
+								<td>{{ user.email }}</td>
+								<td>{{ user.registration_date.strftime('%Y-%m-%d') if user.registration_date else 'N/A' }}</td>
+								<td>
+									<span class="badge bg-{{ 'success' if user.is_active else 'secondary' }}">
+										{{ 'Active' if user.is_active else 'Inactive' }}
+									</span>
+								</td>
+							</tr>
+							{% else %}
+							<tr><td colspan="4" class="text-muted">No recent users</td></tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Recent Transactions -->
+		<div class="col-lg-6">
+			<div class="table-container">
+				<h5 class="mb-3">Recent Transactions</h5>
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>User</th>
+								<th>Type</th>
+								<th>Amount</th>
+								<th>Date</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for txn in recent_transactions %}
+							<tr>
+								<td>{{ txn.user.username if txn.user else 'Unknown' }}</td>
+								<td>
+									<span class="badge bg-{{ 'success' if txn.type == 'deposit' else 'primary' if txn.type == 'income' else 'warning' if txn.type == 'admin_credit' else 'secondary' }}">{{ txn.type|title }}</span>
+								</td>
+								<td>₦{{ (txn.amount or 0)|round(2) }}</td>
+								<td>{{ txn.timestamp.strftime('%Y-%m-%d %H:%M') if txn.timestamp else 'N/A' }}</td>
+							</tr>
+							{% else %}
+							<tr><td colspan="4" class="text-muted">No recent transactions</td></tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row g-4 mt-1">
+		<!-- Pending Withdrawals -->
+		<div class="col-lg-6">
+			<div class="table-container">
+				<h5 class="mb-3">Pending Withdrawals</h5>
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>User</th>
+								<th>Amount</th>
+								<th>Date</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for w in pending_withdrawals %}
+							<tr>
+								<td>#{{ w.id }}</td>
+								<td>{{ w.user.username if w.user else 'Unknown' }}</td>
+								<td>₦{{ (w.amount or 0)|round(2) }}</td>
+								<td>{{ w.created_at.strftime('%Y-%m-%d %H:%M') if w.created_at else 'N/A' }}</td>
+							</tr>
+							{% else %}
+							<tr><td colspan="4" class="text-muted">No pending withdrawals</td></tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Active Packages -->
+		<div class="col-lg-6">
+			<div class="table-container">
+				<h5 class="mb-3">Active Packages</h5>
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Price</th>
+								<th>Daily Return</th>
+								<th>Duration</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for p in active_packages %}
+							<tr>
+								<td>{{ p.name }}</td>
+								<td>₦{{ (p.price or 0)|round(2) }}</td>
+								<td>{{ p.daily_return }}%</td>
+								<td>{{ p.duration }} days</td>
+							</tr>
+							{% else %}
+							<tr><td colspan="4" class="text-muted">No active packages</td></tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

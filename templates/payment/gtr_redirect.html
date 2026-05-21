@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to GTR Bank...</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader-overlay active">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <h3>Redirecting to GTR Bank</h3>
+            <p>Please wait while we redirect you to the secure payment gateway...</p>
+            <div class="payment-details">
+                <div class="detail-item">
+                    <span class="detail-label">Reference:</span>
+                    <span class="detail-value">{{ reference }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-value">₦{{ amount | format_number }}</span>
+                </div>
+            </div>
+            <div id="manual-link-container" style="display: none;">
+                <p><a href="{{ payment_url }}" class="manual-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i>
+                    Click here if not redirected automatically
+                </a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-redirect to payment URL
+        setTimeout(function() {
+            window.location.href = '{{ payment_url }}';
+        }, 3000);
+        
+        // Show manual link after 8 seconds
+        setTimeout(function() {
+            document.getElementById('manual-link-container').style.display = 'block';
+        }, 8000);
+        
+        // Fallback: If still on page after 15 seconds, show error
+        setTimeout(function() {
+            if (document.visibilityState === 'visible') {
+                document.querySelector('.loader-content').innerHTML += 
+                    '<div class="redirect-error">' +
+                    '<p style="color: #ff6b6b; margin-top: 20px;">Automatic redirect failed.</p>' +
+                    '<a href="{{ payment_url }}" class="btn-primary" target="_blank">Continue to Payment</a>' +
+                    '</div>';
+            }
+        }, 15000);
+    </script>
+
+    <style>
+        .payment-details {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .detail-value {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .manual-link {
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .manual-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .redirect-error {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+    </style>
+</body>
+</html>

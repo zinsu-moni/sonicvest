@@ -1,0 +1,25 @@
+MAX WEALTH - WITHDRAWAL REQUEST DECLINED
+==============================================
+
+Hello {{ name }},
+
+We regret to inform you that your recent withdrawal request has been declined. The amount has been refunded to your account.
+
+WITHDRAWAL DETAILS:
+- Withdrawal Amount: ₦{{ amount }}
+- Refund Status: Credited to account
+- Declined Date: {{ decline_date }}
+
+REASON FOR DECLINE:
+{{ decline_reason }}
+
+The withdrawal amount (₦{{ amount }}) has been refunded to your main account balance and is available for use immediately.
+
+If you believe this decision was made in error or would like to discuss this further, please contact our support team and include your withdrawal request details.
+
+View your dashboard: {{ dashboard_url }}
+
+---
+If you have any questions about this decision, please contact us.
+Registered email: {{ email }}
+Need help? support@maxwealth.com

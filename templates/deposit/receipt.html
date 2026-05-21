@@ -1,0 +1,612 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Receipt{% endblock %}
+
+{% block styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    /* Reset Bootstrap overrides */
+    .receipt-page * {
+        box-sizing: border-box;
+    }
+
+    .receipt-page {
+        font-family: 'Inter', sans-serif !important;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F1E8 50%, #E8D4A0 100%) !important;
+        min-height: 100vh !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        color: #1a202c !important;
+    }
+
+    .receipt-page .container {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .receipt-page .receipt-container {
+        max-width: 650px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        position: relative;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .receipt-page .receipt-header {
+        background: linear-gradient(135deg, #D4AF37 0%, #B8941E 100%) !important;
+        color: white !important;
+        padding: 40px 30px !important;
+        text-align: center !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .receipt-page .receipt-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+
+        100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+    }
+
+    .receipt-page .receipt-icon {
+        font-size: 64px !important;
+        margin-bottom: 16px !important;
+        position: relative;
+        z-index: 2;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+            transform: translateY(0);
+        }
+
+        40% {
+            transform: translateY(-10px);
+        }
+
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+
+    .receipt-page .receipt-title {
+        font-size: 32px !important;
+        font-weight: 700 !important;
+        margin: 0 0 8px 0 !important;
+        position: relative;
+        z-index: 2;
+        letter-spacing: -0.5px;
+        color: white !important;
+    }
+
+    .receipt-page .receipt-subtitle {
+        font-size: 16px !important;
+        opacity: 0.9;
+        margin: 0 !important;
+        position: relative;
+        z-index: 2;
+        font-weight: 400 !important;
+        color: white !important;
+    }
+
+    .receipt-body {
+        padding: 40px 30px;
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .receipt-status {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        50% {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        100% {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .status-success {
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        color: white;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .transaction-details {
+        background: white;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+    }
+
+    .receipt-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s ease;
+    }
+
+    .receipt-item:hover {
+        background: #f8fafc;
+        margin: 0 -12px;
+        padding: 16px 12px;
+        border-radius: 12px;
+    }
+
+    .receipt-item:last-child {
+        border-bottom: none;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 16px -24px -24px -24px;
+        padding: 24px;
+        border-radius: 0 0 20px 20px;
+        color: white;
+    }
+
+    .receipt-item:last-child:hover {
+        background: linear-gradient(135deg, #D4AF37 0%, #B8941E 100%);
+        margin: 16px -24px -24px -24px;
+        padding: 24px;
+    }
+
+    .receipt-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .receipt-item:last-child .receipt-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .receipt-value {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 14px;
+    }
+
+    .receipt-item:last-child .receipt-value {
+        color: white;
+    }
+
+    .receipt-amount {
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .receipt-item:last-child .receipt-amount {
+        color: white;
+        background: none;
+        -webkit-text-fill-color: white;
+    }
+
+    .receipt-note {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #bfdbfe;
+        border-radius: 16px;
+        padding: 20px;
+        margin: 24px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .receipt-note::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #D4AF37, #B8941E, #D4AF37);
+        background-size: 200% 100%;
+        animation: loading 2s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    .receipt-note h5 {
+        color: #1e40af;
+        margin-bottom: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .receipt-note p {
+        color: #1e40af;
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+
+    .receipt-actions {
+        padding: 30px;
+        background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-receipt {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 28px;
+        margin: 8px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-receipt::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-receipt:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #D4AF37 0%, #B8941E 100%);
+        color: white;
+        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #D4AF37;
+        border: 2px solid #D4AF37;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        background: #D4AF37;
+        color: white;
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .print-only {
+        display: none;
+    }
+
+    /* Icon animations */
+    .icon {
+        transition: transform 0.2s ease;
+    }
+
+    .receipt-item:hover .icon {
+        transform: scale(1.1);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+
+        .receipt-container {
+            border-radius: 16px;
+            margin: 0;
+        }
+
+        .receipt-header {
+            padding: 30px 20px;
+        }
+
+        .receipt-title {
+            font-size: 24px;
+        }
+
+        .receipt-icon {
+            font-size: 48px;
+        }
+
+        .receipt-body {
+            padding: 24px 20px;
+        }
+
+        .transaction-details {
+            padding: 20px;
+        }
+
+        .receipt-actions {
+            padding: 20px;
+        }
+
+        .btn-receipt {
+            display: block;
+            margin: 8px 0;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .receipt-amount {
+            font-size: 24px;
+        }
+    }
+
+    @media print {
+        body {
+            background: white;
+            padding: 0;
+        }
+
+        .receipt-actions,
+        .no-print {
+            display: none !important;
+        }
+
+        .print-only {
+            display: block !important;
+        }
+
+        .receipt-container {
+            box-shadow: none;
+            border: 1px solid #ddd;
+            border-radius: 0;
+        }
+
+        .receipt-header {
+            background: #D4AF37;
+            background: #667eea !important;
+        }
+
+        .receipt-note::before {
+            display: none;
+        }
+    }
+
+    /* Add some micro-interactions */
+    .receipt-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="receipt-page">
+    <div class="container">
+        <div class="receipt-container">
+            <!-- Receipt Header -->
+            <div class="receipt-header">
+                <div class="receipt-icon">
+                    {% if transaction.status == 'completed' %}
+                    🎉
+                    {% elif transaction.status == 'pending' %}
+                    ⏳
+                    {% else %}
+                    ⚠️
+                    {% endif %}
+                </div>
+                <h1 class="receipt-title">Payment Receipt</h1>
+                <p class="receipt-subtitle">{{ business_name or "SONICVEST" }} • Digital Receipt</p>
+            </div>
+
+            <!-- Receipt Body -->
+            <div class="receipt-body">
+                <!-- Status Badge -->
+                <div class="receipt-status">
+                    <span
+                        class="status-badge {% if transaction.status == 'completed' %}status-success{% else %}status-pending{% endif %}">
+                        {% if transaction.status == 'completed' %}
+                        ✓ Payment Successful
+                        {% else %}
+                        ⏳ Processing Payment
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Transaction Details -->
+                <div class="transaction-details">
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">🆔</span> Transaction ID
+                        </span>
+                        <span class="receipt-value">{{ transaction.reference }}</span>
+                    </div>
+
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">📅</span> Date & Time
+                        </span>
+                        <span class="receipt-value">{{ transaction.created_at.strftime('%B %d, %Y at %I:%M %p')
+                            }}</span>
+                    </div>
+
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">💳</span> Payment Method
+                        </span>
+                        <span class="receipt-value">GTR Pay Gateway</span>
+                    </div>
+
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">👤</span> Account
+                        </span>
+                        <span class="receipt-value">{{ user.username }}</span>
+                    </div>
+
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">📧</span> Email
+                        </span>
+                        <span class="receipt-value">{{ user.email }}</span>
+                    </div>
+
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">📝</span> Description
+                        </span>
+                        <span class="receipt-value">{{ transaction.description }}</span>
+                    </div>
+
+                    {% if trade_no %}
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">🔗</span> GTR Pay Reference
+                        </span>
+                        <span class="receipt-value">{{ trade_no }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Amount (Special styling) -->
+                    <div class="receipt-item">
+                        <span class="receipt-label">
+                            <span class="icon">💰</span> Total Amount
+                        </span>
+                        <span class="receipt-amount">₦{{ "{:,.2f}".format(transaction.amount) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Note -->
+            {% if transaction.status == 'completed' %}
+            <div class="receipt-note">
+                <h5>🎯 What's Next?</h5>
+                <p>• Your funds are now available in your recharge balance<br>
+                    • Ready to purchase investment packages and start earning<br>
+                    • Check your dashboard for updated balance and opportunities<br>
+                    • Keep this receipt for your financial records</p>
+            </div>
+            {% elif transaction.status == 'pending' %}
+            <div class="receipt-note">
+                <h5>⏳ Processing Your Payment</h5>
+                <p>• Your payment is being verified by GTR Pay<br>
+                    • You'll receive an email confirmation once completed<br>
+                    • Processing typically takes 2-5 minutes<br>
+                    • Refresh your dashboard to see updated status</p>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="receipt-actions no-print">
+                <a href="{{ url_for('dashboard') }}" class="btn-receipt btn-primary">
+                    <span>🏠</span> Go to Dashboard
+                </a>
+                <a href="{{ url_for('deposit') }}" class="btn-receipt btn-secondary">
+                    <span>💳</span> Make Another Deposit
+                </a>
+                <button onclick="window.print()" class="btn-receipt btn-secondary">
+                    <span>🖨️</span> Print Receipt
+                </button>
+            </div>
+
+            <!-- Print Only Footer -->
+            <div class="print-only"
+                style="text-align: center; padding: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                <p style="margin: 0; color: #666; font-size: 12px;">
+                    Generated on {{ current_time.strftime('%B %d, %Y at %I:%M %p') }}<br>
+                    {{ business_name or "SONICVEST" }} - Your Trusted Investment Platform<br>
+                    🌐 Secure • Reliable • Transparent
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

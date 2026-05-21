@@ -1,0 +1,127 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Settings - Admin Panel{% endblock %}
+
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="form-container mb-4">
+    <h3 class="mb-4"><i class="fas fa-university me-2"></i>Bank Account Details</h3>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST">
+        <div class="mb-3">
+            <label for="bank_name" class="form-label">Bank Name</label>
+            <input type="text" class="form-control" id="bank_name" name="bank_name" 
+                   value="{{ bank_details.bank_name }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="account_number" class="form-label">Account Number</label>
+            <input type="text" class="form-control" id="account_number" name="account_number" 
+                   value="{{ bank_details.account_number }}" required>
+        </div>
+        
+        <div class="mb-4">
+            <label for="account_name" class="form-label">Account Name</label>
+            <input type="text" class="form-control" id="account_name" name="account_name" 
+                   value="{{ bank_details.account_name }}" required>
+        </div>
+        
+        <button type="submit" name="save_bank" value="1" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>Save Bank Details
+        </button>
+    </form>
+</div>
+
+<div class="form-container">
+    <h3 class="mb-4"><i class="fas fa-cogs me-2"></i>System Settings</h3>
+    
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="welcome_bonus" class="form-label">Welcome Bonus</label>
+                <input type="number" step="0.01" class="form-control" id="welcome_bonus" name="welcome_bonus" 
+                       value="{{ system_settings.welcome_bonus or 100.0 }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="minimum_deposit" class="form-label">Minimum Deposit</label>
+                <input type="number" step="0.01" class="form-control" id="minimum_deposit" name="minimum_deposit" 
+                       value="{{ system_settings.minimum_deposit or 3000.0 }}" required>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="minimum_withdrawal" class="form-label">Minimum Withdrawal</label>
+                <input type="number" step="0.01" class="form-control" id="minimum_withdrawal" name="minimum_withdrawal" 
+                       value="{{ system_settings.minimum_withdrawal or 2200.0 }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="daily_checkin_bonus" class="form-label">Daily Check-in Bonus</label>
+                <input type="number" step="0.01" class="form-control" id="daily_checkin_bonus" name="daily_checkin_bonus" 
+                       value="{{ system_settings.daily_checkin_bonus or 20.0 }}" required>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="withdrawal_fee_percentage" class="form-label">Withdrawal Fee Percentage</label>
+                <input type="number" step="0.01" class="form-control" id="withdrawal_fee_percentage" name="withdrawal_fee_percentage" 
+                       value="{{ system_settings.withdrawal_fee_percentage or 11.0 }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="income_drop_hours" class="form-label">Income Drop Hours</label>
+                <input type="number" step="0.01" class="form-control" id="income_drop_hours" name="income_drop_hours" 
+                       value="{{ system_settings.income_drop_hours or 24.0 }}" required>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="withdrawal_start_time" class="form-label">Withdrawal Start Time (24hr format)</label>
+                <input type="number" class="form-control" id="withdrawal_start_time" name="withdrawal_start_time" 
+                       value="{{ system_settings.withdrawal_start_time or 9 }}" min="0" max="23" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="withdrawal_end_time" class="form-label">Withdrawal End Time (24hr format)</label>
+                <input type="number" class="form-control" id="withdrawal_end_time" name="withdrawal_end_time" 
+                       value="{{ system_settings.withdrawal_end_time or 17 }}" min="0" max="23" required>
+            </div>
+        </div>
+        
+        <h4 class="mt-4 mb-3">Referral Commissions</h4>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="referral_level1" class="form-label">Level 1 (%)</label>
+                <input type="number" step="0.01" class="form-control" id="referral_level1" name="referral_level1" 
+                       value="{{ (system_settings.referral_level1 or 0.15) * 100 }}" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="referral_level2" class="form-label">Level 2 (%)</label>
+                <input type="number" step="0.01" class="form-control" id="referral_level2" name="referral_level2" 
+                       value="{{ (system_settings.referral_level2 or 0.03) * 100 }}" required>
+            </div>
+            <div class="col-md-4 mb-4">
+                <label for="referral_level3" class="form-label">Level 3 (%)</label>
+                <input type="number" step="0.01" class="form-control" id="referral_level3" name="referral_level3" 
+                       value="{{ (system_settings.referral_level3 or 0.01) * 100 }}" required>
+            </div>
+        </div>
+        
+        <button type="submit" name="save_system" value="1" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>Save System Settings
+        </button>
+    </form>
+</div>
+{% endblock %}

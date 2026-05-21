@@ -1,0 +1,15 @@
+Welcome to Max Wealth
+
+Hello {{ name }},
+
+Your Max Wealth account has been created successfully.
+
+Welcome bonus added: N{{ welcome_bonus }}
+
+Sign in to your account:
+{{ login_url }}
+
+Registered email: {{ email }}
+
+If you did not create this account, you can ignore this message.
+For support, contact: support@maxwealth.com

@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+.DS_Store
+.env
+.venv/
+venv/
+/maxwealth.db
+/image.png
+/Screenshot *.png
+/photo_*.jpg
+/photo_*.jpeg
+static/uploads/receipts/

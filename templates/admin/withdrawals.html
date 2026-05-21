@@ -1,0 +1,155 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Withdrawals - Admin Panel{% endblock %}
+{% block page_title %}Withdrawals{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-3">
+	<div class="col-md-3">
+		<div class="stats-card">
+			<div class="text-muted">Total Approved</div>
+			<h3 class="text-success">₦{{ (total_withdrawals or 0)|round(2) }}</h3>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="stats-card">
+			<div class="text-muted">Pending Count</div>
+			<h3 class="text-warning">{{ pending_count or 0 }}</h3>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="stats-card">
+			<div class="text-muted">Pending Amount</div>
+			<h3 class="text-info">₦{{ (pending_amount or 0)|round(2) }}</h3>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="stats-card">
+			<div class="text-muted">Today Approved</div>
+			<h3 class="text-primary">₦{{ (today_withdrawals or 0)|round(2) }}</h3>
+		</div>
+	</div>
+</div>
+
+<div class="table-container">
+	<h5 class="mb-3">All Withdrawals</h5>
+	<div class="table-responsive">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>User</th>
+					<th>Bank Details</th>
+					<th>Amount</th>
+					<th>Net</th>
+					<th>Status</th>
+					<th>Date</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for w in withdrawals %}
+				<tr>
+					<td>#{{ w.id }}</td>
+					<td>{{ w.user.username if w.user else 'Unknown' }}</td>
+					<td>
+						<div>{{ w.bank_name or 'N/A' }}</div>
+						<div>{{ w.account_name or 'N/A' }}</div>
+						<div class="d-flex align-items-center gap-2">
+							<span>{{ w.account_number or 'N/A' }}</span>
+							{% if w.account_number %}
+							<button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2"
+								onclick='copyAccountNumber({{ w.account_number|tojson }})'>
+								Copy
+							</button>
+							{% endif %}
+						</div>
+					</td>
+					<td>₦{{ (w.amount or 0)|round(2) }}</td>
+					<td>₦{{ (w.net_amount or 0)|round(2) }}</td>
+					<td><span
+							class="badge bg-{{ 'success' if w.status == 'completed' else 'warning' if w.status == 'pending' else 'danger' if w.status == 'rejected' else 'secondary' }}">{{
+							w.status|title }}</span></td>
+					<td>{{ w.created_at.strftime('%Y-%m-%d %H:%M') if w.created_at else 'N/A' }}</td>
+					<td>
+						{% if w.status == 'pending' %}
+						<button class="btn btn-sm btn-success me-1"
+							data-url="{{ url_for('admin.approve_withdrawal', withdrawal_id=w.id) }}"
+							onclick="approveWithdrawal(this.dataset.url)"><i
+								class="fas fa-check me-1"></i>Approve</button>
+						<button class="btn btn-sm btn-danger"
+							data-url="{{ url_for('admin.reject_withdrawal', withdrawal_id=w.id) }}"
+							onclick="rejectWithdrawal(this.dataset.url)"><i
+								class="fas fa-times me-1"></i>Reject</button>
+						{% else %}
+						<span class="text-muted">—</span>
+						{% endif %}
+					</td>
+				</tr>
+				{% else %}
+				<tr>
+					<td colspan="8" class="text-muted">No withdrawals yet.</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+	async function approveWithdrawal(url) {
+		if (!confirm('Approve this withdrawal?')) return;
+		try {
+			const res = await fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' }
+			});
+			const data = await res.json();
+			showToast(data.message || (data.success ? 'Approved' : 'Failed'), data.success ? 'success' : 'danger');
+			if (data.success) location.reload();
+		} catch (e) {
+			showToast('Network error approving withdrawal', 'danger');
+		}
+	}
+
+	async function rejectWithdrawal(url) {
+		const reason = prompt('Enter reason for rejection (optional):') || 'Rejected by admin';
+		try {
+			const res = await fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ reason })
+			});
+			const data = await res.json();
+			showToast(data.message || (data.success ? 'Rejected' : 'Failed'), data.success ? 'success' : 'danger');
+			if (data.success) location.reload();
+		} catch (e) {
+			showToast('Network error rejecting withdrawal', 'danger');
+		}
+	}
+
+	async function copyAccountNumber(accountNumber) {
+		if (!accountNumber) return;
+
+		try {
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				await navigator.clipboard.writeText(accountNumber);
+			} else {
+				const tempInput = document.createElement('textarea');
+				tempInput.value = accountNumber;
+				document.body.appendChild(tempInput);
+				tempInput.select();
+				document.execCommand('copy');
+				document.body.removeChild(tempInput);
+			}
+
+			showToast('Account number copied', 'success');
+		} catch (e) {
+			showToast('Could not copy account number', 'danger');
+		}
+	}
+</script>
+{% endblock %}

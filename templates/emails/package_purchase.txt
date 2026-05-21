@@ -1,0 +1,20 @@
+Package Purchase Confirmation
+
+Hello {{ name }},
+
+Your package purchase has been confirmed successfully.
+
+Package: {{ package_name }}
+Amount invested: N{{ package_price }}
+Daily income: N{{ daily_income }}
+Duration: {{ duration_days }} day(s)
+Estimated total return: N{{ total_return }}
+Purchase time: {{ purchase_date }}
+
+Open your dashboard:
+{{ dashboard_url }}
+
+Registered email: {{ email }}
+
+If you did not authorize this purchase, contact support immediately.
+For support, contact: support@maxwealth.com

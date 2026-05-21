@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Request Declined</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f1f2;
+            font-family: Arial, sans-serif;
+            color: #2a2a2a;
+        }
+
+        .container {
+            max-width: 620px;
+            margin: 24px auto;
+            background: #ffffff;
+            border: 1px solid #f0d9dc;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #9d1a2e 0%, #d7263d 100%);
+            padding: 28px 24px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 6px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            margin: 0;
+            color: #ffe8eb;
+        }
+
+        .content {
+            padding: 26px 24px;
+        }
+
+        .content p {
+            font-size: 14px;
+            line-height: 1.65;
+            margin: 0 0 14px;
+            color: #3a3a3a;
+        }
+
+        .alert-box {
+            border: 1px solid #f8d7da;
+            background: #f8d7da;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 16px 0;
+            color: #721c24;
+            font-size: 13px;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .summary {
+            border: 1px solid #f4c9cf;
+            background: #fff5f6;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 18px 0;
+        }
+
+        .summary-row {
+            margin: 0 0 10px;
+            font-size: 14px;
+            color: #9d1a2e;
+        }
+
+        .summary-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-label {
+            font-weight: 700;
+        }
+
+        .reason-box {
+            background: #fff5f6;
+            border-left: 3px solid #d7263d;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+
+        .reason-title {
+            font-weight: 700;
+            color: #9d1a2e;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .reason-text {
+            margin: 0;
+            font-size: 13px;
+            color: #3a3a3a;
+        }
+
+        .cta {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 12px 24px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            background: #d7263d;
+        }
+
+        .footer {
+            border-top: 1px solid #f3e5e7;
+            background: #fff9fa;
+            padding: 16px 24px 20px;
+            color: #7a5860;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .footer a {
+            color: #9d1a2e;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <p class="brand">Max Wealth</p>
+            <p class="subtitle">Withdrawal Request Declined</p>
+        </div>
+
+        <div class="content">
+            <p>Hello {{ name }},</p>
+
+            <div class="alert-box">
+                <div class="alert-title">⚠ Withdrawal Request Declined</div>
+                Your withdrawal request could not be processed at this time.
+            </div>
+
+            <p>We regret to inform you that your recent withdrawal request has been declined. The amount has been
+                refunded to your account.</p>
+
+            <div class="summary">
+                <p class="summary-row"><span class="summary-label">Withdrawal Amount:</span> ₦{{ amount }}</p>
+                <p class="summary-row"><span class="summary-label">Refund Status:</span> Credited to account</p>
+                <p class="summary-row"><span class="summary-label">Declined Date:</span> {{ decline_date }}</p>
+            </div>
+
+            <div class="reason-box">
+                <div class="reason-title">Reason for Decline</div>
+                <p class="reason-text">{{ decline_reason }}</p>
+            </div>
+
+            <p>The withdrawal amount (₦{{ amount }}) has been refunded to your main account balance and is available for
+                use immediately.</p>
+
+            <p>If you believe this decision was made in error or would like to discuss this further, please contact our
+                support team and include your withdrawal request details.</p>
+
+            <p><a href="{{ dashboard_url }}" class="cta">View Dashboard</a></p>
+
+            <p style="font-size:12px;color:#7a5860;">Registered email: <strong>{{ email }}</strong></p>
+        </div>
+
+        <div class="footer">
+            If you have any questions about this decision, please don't hesitate to contact us.<br>
+            Need help? <a href="mailto:support@maxwealth.com">support@maxwealth.com</a>
+        </div>
+    </div>
+</body>
+
+</html>

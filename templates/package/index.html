@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages - SONICVEST</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #F8FAF8;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            padding: 24px 20px 32px;
+            margin: -20px -20px 24px;
+            border-radius: 0 0 28px 28px;
+            color: white;
+        }
+
+        .header-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .header-back:hover {
+            opacity: 1;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            font-size: 15px;
+            opacity: 0.85;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #142114;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #0B6B4E;
+            font-size: 16px;
+        }
+
+        /* Package Cards */
+        .packages-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .package-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(7,30,22,0.06);
+            border: 1px solid #E4EBE4;
+            transition: all 0.2s;
+        }
+
+        .package-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(7,30,22,0.12);
+        }
+
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .package-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: #142114;
+            letter-spacing: -0.02em;
+        }
+
+        .package-price-tag {
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .package-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .package-stat {
+            text-align: center;
+            padding: 14px 10px;
+            background: #F8FAF8;
+            border-radius: 14px;
+        }
+
+        .package-stat-value {
+            font-size: 17px;
+            font-weight: 900;
+            color: #0B3D2E;
+            margin-bottom: 2px;
+        }
+
+        .package-stat-label {
+            font-size: 11px;
+            color: #6B7A6B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .package-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(11,61,46,0.25);
+        }
+
+        .package-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(11,61,46,0.35);
+        }
+
+        /* My Packages Section */
+        .my-packages-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #142114;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .my-package-item {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(7,30,22,0.04);
+            border: 1px solid #E4EBE4;
+        }
+
+        .my-package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .my-package-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #142114;
+        }
+
+        .badge-success {
+            background: #ECFDF3;
+            color: #059669;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .my-package-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #6B7A6B;
+            font-size: 13px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #E4EBE4;
+        }
+
+        .empty-state-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+            color: #0B6B4E;
+        }
+
+        .empty-state-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #142114;
+            margin-bottom: 6px;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+            color: #6B7A6B;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 16px 24px;
+            box-shadow: 0 -8px 32px rgba(7,30,22,0.12);
+            z-index: 1000;
+            border-top: 1px solid rgba(7,30,22,0.08);
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #9CA69C;
+            padding: 8px 16px;
+            border-radius: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: #0B3D2E;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('dashboard') }}" class="header-back">
+                <i class="fas fa-chevron-left"></i>
+                Back to Dashboard
+            </a>
+            <h1 class="header-title">Investment Plans</h1>
+            <p class="header-subtitle">Choose a plan and start earning today</p>
+        </div>
+
+        <!-- Available Packages -->
+        <div class="section-title">
+            <i class="fas fa-crown"></i>
+            Available Plans
+        </div>
+        <div class="packages-grid">
+            {% for package in packages %}
+            <div class="package-card">
+                <div class="package-header">
+                    <h3 class="package-name">{{ package.name }}</h3>
+                    <div class="package-price-tag">
+                        ₦{{ package.price | format_number }}
+                    </div>
+                </div>
+
+                <div class="package-stats">
+                    <div class="package-stat">
+                        <div class="package-stat-value">{{ package.duration }}</div>
+                        <div class="package-stat-label">Cycle</div>
+                    </div>
+                    <div class="package-stat">
+                        <div class="package-stat-value">{{ package.daily_interest }}%</div>
+                        <div class="package-stat-label">Daily</div>
+                    </div>
+                    <div class="package-stat">
+                        <div class="package-stat-value">{{ package.total_interest }}%</div>
+                        <div class="package-stat-label">Total</div>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('package_details', package_id=package.id) }}" class="package-btn">
+                    <i class="fas fa-arrow-right"></i>
+                    Invest Now
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- My Packages -->
+        <div class="my-packages-title">My Investments</div>
+        {% if user_packages %}
+            {% for user_package in user_packages %}
+            <div class="my-package-item">
+                <div class="my-package-header">
+                    <div class="my-package-name">{{ user_package.package.name }}</div>
+                    <span class="badge-success">Active</span>
+                </div>
+                <div class="my-package-meta">
+                    <span>Invested: ₦{{ user_package.amount_invested | format_number }}</span>
+                    <span>Earned: ₦{{ (user_package.total_earned or 0) | format_number }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="empty-state-title">No Investments Yet</div>
+                <div class="empty-state-text">Choose a plan above to start earning passive income</div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-items">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="{{ url_for('packages') }}" class="nav-item active">
+                <i class="fas fa-box nav-icon"></i>
+                <span class="nav-label">Plans</span>
+            </a>
+            <a href="{{ url_for('referral') }}" class="nav-item">
+                <i class="fas fa-users nav-icon"></i>
+                <span class="nav-label">Team</span>
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span class="nav-label">Profile</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

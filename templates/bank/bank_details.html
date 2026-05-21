@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Details - SONICVEST</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .bank-container {
+            max-width: 460px;
+            margin: 0 auto;
+            padding: 16px 12px 90px;
+            background: linear-gradient(180deg, #efe4e7 0%, #f6efef 100%);
+            min-height: 100vh;
+        }
+
+        .bank-header {
+            background: linear-gradient(135deg, #ed1c24 0%, #d41832 58%, #bc1532 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 16px 28px rgba(209, 28, 45, 0.28);
+        }
+
+        .bank-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bank-card {
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 12px 24px rgba(17, 38, 64, 0.1);
+        }
+
+        .current-bank-details {
+            border-left: 4px solid #d1182f;
+        }
+
+        .bank-title {
+            color: #d1182f;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bank-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bank-info-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .bank-info-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .bank-info-value {
+            font-size: 16px;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #d1182f;
+            box-shadow: 0 0 0 3px rgba(209, 24, 47, 0.15);
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+        }
+
+        .form-error {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f02424 0%, #cb1833 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(213, 23, 43, 0.25);
+            background: linear-gradient(135deg, #df1b27 0%, #b9152f 100%);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #d1fae5;
+            border: 1px solid #4CAF50;
+            color: #2E7D32;
+        }
+
+        .error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #d1d5db;
+        }
+
+        @media (max-width: 768px) {
+            .bank-container {
+                padding: 14px 10px 86px;
+            }
+
+            .bank-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Back Button -->
+    <a href="{{ url_for('profile') }}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
+    <div class="bank-container">
+        <!-- Header -->
+        <div class="bank-header">
+            <h1>
+                <i class="fas fa-university"></i>
+                Bank Details Management
+            </h1>
+            <p>Manage your bank account information for withdrawals</p>
+        </div>
+
+        <!-- Messages -->
+        <div id="successMessage" class="message success">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText"></span>
+        </div>
+
+        <div id="errorMessage" class="message error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Current Bank Details -->
+        {% if current_user.bank_name and current_user.account_number and current_user.account_name %}
+        <div class="bank-card current-bank-details">
+            <div class="bank-title">
+                <i class="fas fa-check-circle"></i>
+                Current Bank Details
+            </div>
+
+            <div class="bank-info-grid">
+                <div class="bank-info-item">
+                    <div class="bank-info-label">Bank Name</div>
+                    <div class="bank-info-value">{{ current_user.bank_name }}</div>
+                </div>
+
+                <div class="bank-info-item">
+                    <div class="bank-info-label">Account Number</div>
+                    <div class="bank-info-value">{{ current_user.account_number }}</div>
+                </div>
+
+                <div class="bank-info-item" style="grid-column: 1 / -1;">
+                    <div class="bank-info-label">Account Name</div>
+                    <div class="bank-info-value">{{ current_user.account_name }}</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="showEditForm()">
+                    <i class="fas fa-edit"></i>
+                    Update Details
+                </button>
+                <button class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i>
+                    Remove Details
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="bank-card">
+            <div class="empty-state">
+                <i class="fas fa-university"></i>
+                <h3>No Bank Details Found</h3>
+                <p>Add your bank account information to enable quick withdrawals</p>
+                <button class="btn btn-primary" onclick="showAddForm()">
+                    <i class="fas fa-plus"></i>
+                    Add Bank Details
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Add/Edit Form -->
+        <div id="bankForm" class="bank-card" style="display: none;">
+            <div style="color: #D4AF37; font-size: 18px; font-weight: 600; margin-bottom: 15px;">
+                <i class="fas fa-plus"></i>
+                <span id="formTitle">Add Bank Details</span>
+            </div>
+
+            <form id="bankDetailsForm">
+                <div class="form-group">
+                    <label for="bankName" class="form-label">Bank Name</label>
+                    <select id="bankName" name="bank_name" class="form-input" required>
+                        <option value="">Select your bank</option>
+                        <option value="Access Bank Limited">Access Bank Limited</option>
+                        <option value="Citibank Nigeria Limited">Citibank Nigeria Limited</option>
+                        <option value="Ecobank Nigeria Limited">Ecobank Nigeria Limited</option>
+                        <option value="Fidelity Bank Plc">Fidelity Bank Plc</option>
+                        <option value="First Bank of Nigeria Limited">First Bank of Nigeria Limited</option>
+                        <option value="First City Monument Bank Limited (FCMB)">First City Monument Bank Limited (FCMB)
+                        </option>
+                        <option value="Globus Bank Limited">Globus Bank Limited</option>
+                        <option value="Guaranty Trust Bank Limited">Guaranty Trust Bank Limited</option>
+                        <option value="Keystone Bank Limited">Keystone Bank Limited</option>
+                        <option value="Optimus Bank Limited">Optimus Bank Limited</option>
+                        <option value="Parallex Bank Limited">Parallex Bank Limited</option>
+                        <option value="Polaris Bank Limited">Polaris Bank Limited</option>
+                        <option value="Premium Trust Bank Limited">Premium Trust Bank Limited</option>
+                        <option value="Providus Bank Limited">Providus Bank Limited</option>
+                        <option value="Signature Bank Limited">Signature Bank Limited</option>
+                        <option value="Stanbic IBTC Bank Limited">Stanbic IBTC Bank Limited</option>
+                        <option value="Standard Chartered Bank Nigeria Limited">Standard Chartered Bank Nigeria Limited
+                        </option>
+                        <option value="Sterling Bank Limited">Sterling Bank Limited</option>
+                        <option value="SunTrust Bank Nigeria Limited">SunTrust Bank Nigeria Limited</option>
+                        <option value="Titan Trust Bank Limited">Titan Trust Bank Limited</option>
+                        <option value="Union Bank of Nigeria Plc">Union Bank of Nigeria Plc</option>
+                        <option value="United Bank for Africa Plc (UBA)">United Bank for Africa Plc (UBA)</option>
+                        <option value="Unity Bank Plc">Unity Bank Plc</option>
+                        <option value="Wema Bank Plc">Wema Bank Plc</option>
+                        <option value="Zenith Bank Plc">Zenith Bank Plc</option>
+                        <option value="Jaiz Bank Plc (non-interest)">Jaiz Bank Plc (non-interest)</option>
+                        <option value="TAJBank Limited (non-interest)">TAJBank Limited (non-interest)</option>
+                        <option value="Lotus Bank Limited (non-interest)">Lotus Bank Limited (non-interest)</option>
+                        <option value="The Alternative Bank Limited (non-interest)">The Alternative Bank Limited
+                            (non-interest)</option>
+                        <option value="Coronation Merchant Bank Limited">Coronation Merchant Bank Limited</option>
+                        <option value="FBN Merchant Bank Limited">FBN Merchant Bank Limited</option>
+                        <option value="FSDH Merchant Bank Limited">FSDH Merchant Bank Limited</option>
+                        <option value="Greenwich Merchant Bank Limited">Greenwich Merchant Bank Limited</option>
+                        <option value="NOVA Merchant Bank Limited">NOVA Merchant Bank Limited</option>
+                        <option value="Rand Merchant Bank Nigeria Limited">Rand Merchant Bank Nigeria Limited</option>
+                        <option value="Hope PSB">Hope PSB [PSB]</option>
+                        <option value="9 Payment Service Bank (9PSB)">9 Payment Service Bank (9PSB) [PSB]</option>
+                        <option value="MoMo Payment Service Bank (MTN)">MoMo Payment Service Bank (MTN) [PSB]</option>
+                        <option value="SmartCash Payment Service Bank (Airtel)">SmartCash Payment Service Bank (Airtel)
+                            [PSB]</option>
+                        <option value="MoneyMaster PSB (Glo)">MoneyMaster PSB (Glo) [PSB]</option>
+                        <option value="OPay (Opay Digital Services Ltd)">OPay (Opay Digital Services Ltd) [MMO]</option>
+                        <option value="PalmPay Limited">PalmPay Limited [MMO]</option>
+                        <option value="Paga (Pagatech Limited)">Paga (Pagatech Limited) [MMO]</option>
+                        <option value="NowNow Digital Systems Limited">NowNow Digital Systems Limited [MMO]</option>
+                        <option value="KongaPay Technologies Limited">KongaPay Technologies Limited [MMO]</option>
+                        <option value="eTranzact International Limited">eTranzact International Limited [MMO]</option>
+                        <option value="Fortis Mobile Money Limited">Fortis Mobile Money Limited [MMO]</option>
+                        <option value="Funds & Electronic Transfer Services – FETS">Funds & Electronic Transfer Services
+                            – FETS [MMO]</option>
+                        <option value="Hedonmark Management Services Limited">Hedonmark Management Services Limited
+                            [MMO]</option>
+                        <option value="Mkudi Limited">Mkudi Limited [MMO]</option>
+                        <option value="Parkway Projects Limited">Parkway Projects Limited [MMO]</option>
+                        <option value="Teasy International Company Limited">Teasy International Company Limited [MMO]
+                        </option>
+                        <option value="Visual ICT Limited">Visual ICT Limited [MMO]</option>
+                        <option value="VTNetwork Limited">VTNetwork Limited [MMO]</option>
+                        <option value="Xpress MTS Limited">Xpress MTS Limited [MMO]</option>
+                        <option value="Abeg Technologies Limited (PocketApp)">Abeg Technologies Limited (PocketApp)
+                            [MMO]</option>
+                        <option value="Kuda Microfinance Bank">Kuda Microfinance Bank [MFB]</option>
+                        <option value="Moniepoint Microfinance Bank">Moniepoint Microfinance Bank [MFB]</option>
+                        <option value="FairMoney Microfinance Bank">FairMoney Microfinance Bank [MFB]</option>
+                        <option value="VFD Microfinance Bank (V Bank)">VFD Microfinance Bank (V Bank) [MFB]</option>
+                        <option value="Carbon Microfinance Bank">Carbon Microfinance Bank [MFB]</option>
+                        <option value="Sparkle Microfinance Bank">Sparkle Microfinance Bank [MFB]</option>
+                    </select>
+                    <div class="form-error" id="bankNameError">Please select a bank</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="accountNumber" class="form-label">Account Number</label>
+                    <input type="text" id="accountNumber" name="account_number" class="form-input"
+                        placeholder="Enter your 10-digit account number" maxlength="10" required>
+                    <div class="form-error" id="accountNumberError">Please enter a valid 10-digit account number</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="accountName" class="form-label">Account Name</label>
+                    <input type="text" id="accountName" name="account_name" class="form-input"
+                        placeholder="Enter your full account name" required>
+                    <div class="form-error" id="accountNameError">Please enter your account name</div>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span id="submitButtonText">Save Bank Details</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelForm()">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let isEditing = false;
+
+        function showAddForm() {
+            document.getElementById('bankForm').style.display = 'block';
+            document.getElementById('formTitle').textContent = 'Add Bank Details';
+            document.getElementById('submitButtonText').textContent = 'Save Bank Details';
+            isEditing = false;
+            clearForm();
+        }
+
+        function showEditForm() {
+            document.getElementById('bankForm').style.display = 'block';
+            document.getElementById('formTitle').textContent = 'Update Bank Details';
+            document.getElementById('submitButtonText').textContent = 'Update Details';
+            isEditing = true;
+
+            // Populate form with current data
+            {% if current_user.bank_name and current_user.account_number and current_user.account_name %}
+            document.getElementById('bankName').value = '{{ current_user.bank_name }}';
+            document.getElementById('accountNumber').value = '{{ current_user.account_number }}';
+            document.getElementById('accountName').value = '{{ current_user.account_name }}';
+            {% endif %}
+        }
+
+        function cancelForm() {
+            document.getElementById('bankForm').style.display = 'none';
+            clearForm();
+            clearErrors();
+        }
+
+        function clearForm() {
+            document.getElementById('bankDetailsForm').reset();
+        }
+
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.form-error');
+            const inputElements = document.querySelectorAll('.form-input');
+
+            errorElements.forEach(el => el.style.display = 'none');
+            inputElements.forEach(el => el.classList.remove('error'));
+        }
+
+        function showError(fieldId, message) {
+            const input = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + 'Error');
+
+            input.classList.add('error');
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+
+        function showMessage(type, message) {
+            const messageEl = document.getElementById(type + 'Message');
+            const textEl = document.getElementById(type + 'Text');
+
+            // Hide other messages first
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            textEl.textContent = message;
+            messageEl.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function confirmDelete() {
+            if (confirm('Are you sure you want to remove your bank details? This action cannot be undone.')) {
+                deleteBankDetails();
+            }
+        }
+
+        function deleteBankDetails() {
+            fetch('{{ url_for("update_bank_details") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'delete'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('success', 'Bank details removed successfully');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showMessage('error', data.message || 'Failed to remove bank details');
+                    }
+                })
+                .catch(error => {
+                    showMessage('error', 'An error occurred. Please try again.');
+                });
+        }
+
+        // Form validation
+        document.getElementById('accountNumber').addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('accountName').addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
+        });
+
+        // Form submission
+        document.getElementById('bankDetailsForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearErrors();
+
+            const bankName = document.getElementById('bankName').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const accountName = document.getElementById('accountName').value;
+
+            console.log('Form values before validation:', { bankName, accountNumber, accountName });
+
+            // Simple validation
+            let hasErrors = false;
+
+            console.log('Checking bankName:', bankName, 'Type:', typeof bankName, 'Length:', bankName.length);
+
+            if (!bankName) {
+                console.log('Bank validation failed - empty bankName');
+                showError('bankName', 'Please select a bank');
+                hasErrors = true;
+            }
+
+            if (!accountNumber || accountNumber.length !== 10) {
+                showError('accountNumber', 'Please enter a valid 10-digit account number');
+                hasErrors = true;
+            }
+
+            if (!accountName || accountName.trim().length < 3) {
+                showError('accountName', 'Please enter a valid account name (minimum 3 characters)');
+                hasErrors = true;
+            }
+
+            if (hasErrors) return;
+
+            // Submit form
+            const data = {
+                bank_name: bankName,
+                account_number: accountNumber,
+                account_name: accountName.trim()
+            };
+
+            fetch('{{ url_for("update_bank_details") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('success', isEditing ? 'Bank details updated successfully' : 'Bank details saved successfully');
+                        cancelForm();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showMessage('error', data.message || 'Failed to save bank details');
+                    }
+                })
+                .catch(error => {
+                    showMessage('error', 'An error occurred. Please try again.');
+                });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invite Friends - SONICVEST</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #F0F9F4;
+            min-height: 100vh;
+            color: #142114;
+            padding: 20px 16px 100px 16px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #0B3D2E;
+            font-size: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #142114;
+        }
+
+        /* Invite Section */
+        .invite-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .invite-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: white;
+        }
+
+        .invite-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #142114;
+        }
+
+        .invite-subtitle {
+            color: #6B7A6B;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* Code Section */
+        .code-section {
+            background: white;
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(7,30,22,0.08);
+            border: 1px solid rgba(7,30,22,0.05);
+        }
+
+        .qr-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .qr-code {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 2px solid #E5F1EA;
+        }
+
+        .qr-placeholder {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .qr-placeholder::before {
+            content: "QR";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 900;
+            font-size: 24px;
+        }
+
+        .code-details {
+            flex: 1;
+        }
+
+        .code-label {
+            color: #6B7A6B;
+            font-size: 14px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .code-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0B3D2E;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .copy-code-btn {
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: block;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(11,61,46,0.2);
+            transition: all 0.3s;
+        }
+
+        .copy-code-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .link-section {
+            margin-top: 20px;
+        }
+
+        .link-label {
+            color: #6B7A6B;
+            font-size: 14px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .link-value {
+            font-size: 12px;
+            color: #6B7A6B;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .copy-link-btn {
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(11,61,46,0.2);
+            transition: all 0.3s;
+        }
+
+        .copy-link-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Team Section */
+        .team-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .team-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 28px;
+            color: white;
+        }
+
+        .team-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #142114;
+        }
+
+        .team-subtitle {
+            color: #6B7A6B;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .team-stats {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(7,30,22,0.08);
+            border: 1px solid rgba(7,30,22,0.05);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #E5F1EA;
+        }
+
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+
+        .stats-label {
+            color: #6B7A6B;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stats-value {
+            color: #0B3D2E;
+            font-weight: 800;
+        }
+
+        .no-referrals {
+            color: #6B7A6B;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 16px 24px;
+            box-shadow: 0 -8px 32px rgba(7,30,22,0.12);
+            z-index: 1000;
+            border-top: 1px solid rgba(7,30,22,0.08);
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #9CA69C;
+            padding: 8px 16px;
+            border-radius: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: #0B3D2E;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 480px) {
+            .qr-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .qr-code {
+                margin: 0 auto 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header Section -->
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="page-title">Invite Friends</div>
+        </div>
+
+        <!-- Invite Friends Section -->
+        <div class="invite-section">
+            <div class="invite-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h1 class="invite-title">Invite Friends</h1>
+            <p class="invite-subtitle">Scan QR-code or copy invitation link or code so as to invite more friends to join your team</p>
+        </div>
+
+        <!-- QR Code and Invitation Section -->
+        <div class="code-section">
+            <div class="qr-container">
+                <div class="qr-code">
+                    <div class="qr-placeholder"></div>
+                </div>
+                <div class="code-details">
+                    <div class="code-label">Invitation Code</div>
+                    <div class="code-value" id="inviteCode">{{ (user.referral_code if user else current_user.referral_code) if (user or current_user) else 'SONIC123' }}</div>
+                    <button class="copy-code-btn" onclick="copyCode()">Copy Code</button>
+
+                    <div class="link-section">
+                        <div class="link-label">Invitation Link</div>
+                        <div class="link-value" id="inviteLink">{{ request.url_root }}register?ref={{ (user.referral_code if user else current_user.referral_code) if (user or current_user) else 'SONIC123' }}</div>
+                        <button class="copy-link-btn" onclick="copyLink()">Copy Link</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Section -->
+        <div class="team-section">
+            <div class="team-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h2 class="team-title">Team</h2>
+            <p class="team-subtitle">All my team earning and my team members</p>
+
+            <div class="team-stats">
+                {% if level1_referrals and level1_referrals|length > 0 %}
+                <div class="stats-row">
+                    <span class="stats-label">Team members ({{ (level1_referrals|length if level1_referrals else 0) + (level2_referrals|length if level2_referrals else 0) + (level3_referrals|length if level3_referrals else 0) }})</span>
+                    <span class="stats-value">Levels</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Member ID</span>
+                    <span class="stats-label">Date</span>
+                </div>
+                {% for referral in level1_referrals[:5] %}
+                <div class="stats-row">
+                    <span class="stats-label">{{ referral.username or 'User' ~ loop.index|string }}</span>
+                    <span class="stats-value">{{ referral.created_at.strftime('%m/%d') if referral.created_at else 'Recent' }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="no-referrals">No referrals found.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="{{ url_for('dashboard') }}" class="nav-item">
+            <i class="fas fa-home nav-icon"></i>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="{{ url_for('packages') }}" class="nav-item">
+            <i class="fas fa-box nav-icon"></i>
+            <span class="nav-label">Plans</span>
+        </a>
+        <a href="{{ url_for('referral') }}" class="nav-item active">
+            <i class="fas fa-users nav-icon"></i>
+            <span class="nav-label">Team</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="nav-item">
+            <i class="fas fa-user nav-icon"></i>
+            <span class="nav-label">Profile</span>
+        </a>
+    </div>
+
+    <script>
+        let currentReferralCode = '{{ (user.referral_code if user else current_user.referral_code) if (user or current_user) else "SONIC123" }}';
+        let inviteLink = '{{ request.url_root }}register?ref=' + currentReferralCode;
+
+        function copyCode() {
+            navigator.clipboard.writeText(currentReferralCode).then(function () {
+                showSuccess('.copy-code-btn', 'Copied!');
+            }).catch(function (err) {
+                fallbackCopy(currentReferralCode);
+                showSuccess('.copy-code-btn', 'Copied!');
+            });
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(inviteLink).then(function () {
+                showSuccess('.copy-link-btn', 'Copied!');
+            }).catch(function (err) {
+                fallbackCopy(inviteLink);
+                showSuccess('.copy-link-btn', 'Copied!');
+            });
+        }
+
+        function showSuccess(selector, message) {
+            const btn = document.querySelector(selector);
+            const originalText = btn.textContent;
+            btn.textContent = message;
+            btn.style.background = 'linear-gradient(135deg, #0B6B4E 0%, #1F8A70 100%)';
+
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%)';
+            }, 2000);
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

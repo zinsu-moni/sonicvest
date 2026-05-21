@@ -1,0 +1,27 @@
+SONIC PAY - WITHDRAWAL REQUEST RECEIVED
+=============================================
+
+Hello {{ name }},
+
+Your withdrawal request has been received and is under review.
+
+WITHDRAWAL DETAILS:
+- Withdrawal Amount: ₦{{ amount }}
+- Withdrawal Fee: ₦{{ fee }} ({{ fee_percentage }}%)
+- Net Amount: ₦{{ net_amount }}
+- Bank Name: {{ bank_name }}
+- Account Number: {{ account_number }}
+- Account Name: {{ account_name }}
+- Status: Under Review
+- Request Date: {{ request_date }}
+
+Your request is being reviewed by our admin team. This typically takes 24-48 hours. You will receive a confirmation email once your withdrawal is approved or if there are any issues.
+
+View your dashboard: {{ dashboard_url }}
+
+IMPORTANT SECURITY NOTE:
+Do not share your withdrawal details with anyone.
+
+---
+Registered email: {{ email }}
+Need help? support@maxwealth.com

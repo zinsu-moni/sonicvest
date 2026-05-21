@@ -1,0 +1,292 @@
+{% extends "admin/base.html" %}
+
+{% block title %}User Deposits{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0"><i class="fas fa-piggy-bank"></i> User Deposits History</h2>
+            <p class="text-muted">View all user-initiated deposits (excludes admin-added credits)</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-receipt"></i> Total Deposits</h5>
+                    <h2 class="mb-0">{{ stats.total_deposits or 0 }}</h2>
+                    <small>Total deposit records</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-check-circle"></i> Completed</h5>
+                    <h2 class="mb-0">{{ stats.completed_count or 0 }}</h2>
+                    <small>Approved deposits</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-hourglass-half"></i> Pending</h5>
+                    <h2 class="mb-0">{{ stats.pending_count or 0 }}</h2>
+                    <small>Awaiting approval</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-money-bill"></i> Total Amount</h5>
+                    <h2 class="mb-0">₦{{ "{:,.0f}".format(stats.total_amount or 0) }}</h2>
+                    <small>Completed deposits</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Search by user name..." id="searchInput">
+                </div>
+                <div class="col-md-4">
+                    <select class="form-control" id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="completed">Completed Only</option>
+                        <option value="pending">Pending Only</option>
+                        <option value="failed">Failed Only</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100" onclick="applyFilters()">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposits Table -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Deposits List</h5>
+        </div>
+        <div class="card-body">
+            {% if deposits %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="depositsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>User Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Reference</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="depositsTableBody">
+                        {% for deposit in deposits %}
+                        <tr class="deposit-row" data-status="{{ deposit.status }}">
+                            <td><strong>#{{ deposit.id }}</strong></td>
+                            <td>
+                                <strong>{{ deposit.name }}</strong>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ deposit.email }}</small>
+                            </td>
+                            <td>
+                                {% if deposit.phone %}
+                                <small><i class="fas fa-phone"></i> {{ deposit.phone }}</small>
+                                {% else %}
+                                <small class="text-muted">-</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-primary">₦{{ "{:,.0f}".format(deposit.amount) }}</strong>
+                            </td>
+                            <td>
+                                {% if deposit.status == 'completed' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i> Completed
+                                </span>
+                                {% elif deposit.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-hourglass-half"></i> Pending
+                                </span>
+                                {% elif deposit.status == 'failed' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle"></i> Failed
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ deposit.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if deposit.reference %}
+                                <code style="font-size: 11px;">{{ deposit.reference[:20] }}{% if deposit.reference|length > 20 %}...{% endif %}</code>
+                                {% else %}
+                                <small class="text-muted">-</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {% if deposit.description %}
+                                    {{ deposit.description[:40] }}{% if deposit.description|length > 40 %}...{% endif %}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                <small>{{ deposit.created_at.strftime('%Y-%m-%d %H:%M') if deposit.created_at else '-' }}</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ current_page - 1 }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in range(1, total_pages + 1) %}
+                        {% if page_num == current_page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% elif page_num <= current_page + 2 and page_num >= current_page - 2 %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if current_page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ current_page + 1 }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ total_pages }}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h4>No Deposits Found</h4>
+                <p class="text-muted">There are no user deposits in the system yet</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5><i class="fas fa-download"></i> Export Data</h5>
+            <p class="text-muted">Download deposit records for reporting</p>
+            <button class="btn btn-success" onclick="exportToCSV()">
+                <i class="fas fa-file-csv"></i> Export to CSV
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function applyFilters() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('.deposit-row');
+
+    rows.forEach(row => {
+        let visible = true;
+
+        // Status filter
+        if (statusFilter && row.getAttribute('data-status') !== statusFilter) {
+            visible = false;
+        }
+
+        // Search filter (search in name, email, phone)
+        if (searchInput && visible) {
+            const text = row.textContent.toLowerCase();
+            if (!text.includes(searchInput)) {
+                visible = false;
+            }
+        }
+
+        row.style.display = visible ? '' : 'none';
+    });
+}
+
+// Allow Enter key to trigger filter
+document.getElementById('searchInput').addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {
+        applyFilters();
+    }
+});
+
+function exportToCSV() {
+    const rows = [];
+    const table = document.getElementById('depositsTable');
+    
+    // Get headers
+    const headers = [];
+    table.querySelectorAll('thead th').forEach(th => {
+        headers.push(th.textContent.trim());
+    });
+    rows.push(headers.join(','));
+    
+    // Get data
+    table.querySelectorAll('tbody tr').forEach(tr => {
+        const cells = [];
+        tr.querySelectorAll('td').forEach(td => {
+            let text = td.textContent.trim();
+            // Escape quotes and wrap in quotes if contains comma
+            text = '"' + text.replace(/"/g, '""') + '"';
+            cells.push(text);
+        });
+        rows.push(cells.join(','));
+    });
+    
+    // Create and download file
+    const csvContent = rows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'user_deposits_' + new Date().toISOString().slice(0, 10) + '.csv');
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+{% endblock %}

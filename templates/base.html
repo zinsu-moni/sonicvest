@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Max Wealth{% endblock %}</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Modern Design System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-design-system.css') }}">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- Loader CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+
+<body class="bg-light" style="background: var(--color-neutral-50);">
+    <!-- Flash messages -->
+    <div class="modern-container" style="padding-top: var(--space-6);">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="modern-alert modern-alert-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}">
+            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'exclamation-triangle' if category == 'warning' else 'info-circle' }} modern-alert-icon"></i>
+            <div class="modern-alert-content">
+                <div class="modern-alert-title">{{ message }}</div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- Loader JS -->
+    <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+
+</html>

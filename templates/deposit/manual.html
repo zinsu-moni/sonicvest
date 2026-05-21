@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Transfer - SONICVEST</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #F8FAF8;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            padding: 24px 20px 32px;
+            margin: -20px -20px 28px -20px;
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(167,243,208,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -80px;
+            right: -60px;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+
+        .header-title {
+            color: white;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 40px rgba(7,30,22,0.08);
+            margin-bottom: 20px;
+            border: 1px solid rgba(7,30,22,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0B3D2E, #1F8A70);
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: #142114;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: #0B6B4E;
+            font-size: 20px;
+        }
+
+        /* Bank Details */
+        .bank-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #E4EBE4;
+        }
+
+        .bank-detail:last-child {
+            border-bottom: none;
+        }
+
+        .bank-label {
+            font-size: 14px;
+            color: #6B7A6B;
+            font-weight: 600;
+        }
+
+        .bank-value {
+            font-size: 14px;
+            font-weight: 800;
+            color: #142114;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #A7F3D0 0%, #6EE7B7 100%);
+            color: #0B3D2E;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #6EE7B7 0%, #34D399 100%);
+            transform: translateY(-1px);
+        }
+
+        /* Notice */
+        .notice {
+            background: #FFFBEB;
+            border-left: 4px solid #F59E0B;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(245,158,11,0.06);
+        }
+
+        .notice-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #92400E;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-title i {
+            color: #F59E0B;
+        }
+
+        .notice-text {
+            font-size: 14px;
+            color: #78350F;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        /* File Upload */
+        .file-upload {
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+            border: 2px dashed #0B3D2E;
+            border-radius: 20px;
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            background: linear-gradient(135deg, #DCFCE7 0%, #A7F3D0 100%);
+            transform: translateY(-2px);
+        }
+
+        .file-upload i {
+            font-size: 48px;
+            color: #0B3D2E;
+            margin-bottom: 14px;
+        }
+
+        .file-upload-text {
+            font-size: 15px;
+            color: #0B3D2E;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-small {
+            font-size: 13px;
+            color: #6B7A6B;
+            font-weight: 500;
+        }
+
+        .file-name {
+            margin-top: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0B3D2E;
+            display: none;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            border-radius: 14px;
+            margin-top: 14px;
+            display: none;
+            box-shadow: 0 4px 16px rgba(7,30,22,0.1);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(11,61,46,0.25);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(11,61,46,0.35);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            border: 1px solid #86EFAC;
+            color: #0B3D2E;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+            border: 1px solid #FCA5A5;
+            color: #991B1B;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 16px 24px;
+            box-shadow: 0 -8px 32px rgba(7,30,22,0.12);
+            z-index: 1000;
+            border-top: 1px solid rgba(7,30,22,0.08);
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #9CA69C;
+            padding: 8px 16px;
+            border-radius: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: #0B3D2E;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <a href="{{ url_for('deposit') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="header-title">Bank Transfer</h1>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="alertSuccess" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span id="successMessage"></span>
+        </div>
+        <div id="alertError" class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="errorMessage"></span>
+        </div>
+
+        <!-- Bank Details Card -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-university"></i>
+                Bank Account Details
+            </h2>
+
+            <div class="bank-detail">
+                <span class="bank-label">Bank Name</span>
+                <span class="bank-value">
+                    {{ bank_details.bank_name }}
+                    <button class="copy-btn" onclick="copyText('{{ bank_details.bank_name }}')">Copy</button>
+                </span>
+            </div>
+            <div class="bank-detail">
+                <span class="bank-label">Account Number</span>
+                <span class="bank-value">
+                    {{ bank_details.account_number }}
+                    <button class="copy-btn" onclick="copyText('{{ bank_details.account_number }}')">Copy</button>
+                </span>
+            </div>
+            <div class="bank-detail">
+                <span class="bank-label">Account Name</span>
+                <span class="bank-value">
+                    {{ bank_details.account_name }}
+                    <button class="copy-btn" onclick="copyText('{{ bank_details.account_name }}')">Copy</button>
+                </span>
+            </div>
+        </div>
+
+        <!-- Notice -->
+        <div class="notice">
+            <div class="notice-title">
+                <i class="fas fa-info-circle"></i>
+                Important Notice
+            </div>
+            <p class="notice-text">
+                After payment, upload your payment receipt below. Your deposit will be credited after admin verification (usually within 1-24 hours).
+            </p>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-file-upload"></i>
+                Upload Payment Proof
+            </h2>
+
+            <form id="depositForm" method="POST" enctype="multipart/form-data">
+                <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="file-upload-text">Click to upload payment receipt</div>
+                    <div class="file-upload-small">(JPG, PNG, PDF - Max 5MB)</div>
+                    <div class="file-name" id="fileName"></div>
+                </div>
+                <input type="file" id="fileInput" name="receipt" accept="image/*,.pdf" required>
+                <img id="previewImage" class="preview-image" alt="Receipt preview">
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Deposit Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-items">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="{{ url_for('packages') }}" class="nav-item">
+                <i class="fas fa-box nav-icon"></i>
+                <span class="nav-label">Plans</span>
+            </a>
+            <a href="{{ url_for('referral') }}" class="nav-item">
+                <i class="fas fa-users nav-icon"></i>
+                <span class="nav-label">Team</span>
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span class="nav-label">Profile</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('success', 'Copied to clipboard!');
+            });
+        }
+
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const previewImage = document.getElementById('previewImage');
+
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = '✓ ' + file.name;
+                fileName.style.display = 'block';
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImage.src = e.target.result;
+                        previewImage.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImage.style.display = 'none';
+                }
+            }
+        });
+
+        document.getElementById('depositForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!fileInput.files[0]) {
+                showAlert('error', 'Please upload your payment receipt');
+                return;
+            }
+
+            if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                showAlert('error', 'File size must be less than 5MB');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            fetch('{{ url_for("process_manual_deposit") }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        setTimeout(() => {
+                            window.location.href = '{{ url_for("deposit_history") }}';
+                        }, 2000);
+                    } else {
+                        showAlert('error', data.message || 'Failed to submit deposit request');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Deposit Request';
+                    }
+                })
+                .catch(error => {
+                    showAlert('error', 'An error occurred. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Deposit Request';
+                });
+        });
+
+        function showAlert(type, message) {
+            const alertSuccess = document.getElementById('alertSuccess');
+            const alertError = document.getElementById('alertError');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            alertSuccess.style.display = 'none';
+            alertError.style.display = 'none';
+
+            if (type === 'success') {
+                successMessage.textContent = message;
+                alertSuccess.style.display = 'block';
+                setTimeout(() => {
+                    alertSuccess.style.display = 'none';
+                }, 5000);
+            } else {
+                errorMessage.textContent = message;
+                alertError.style.display = 'block';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

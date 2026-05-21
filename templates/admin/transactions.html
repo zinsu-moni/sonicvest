@@ -1,0 +1,724 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Transactions - Admin Panel{% endblock %}
+
+{% block page_title %}Transaction Management{% endblock %}
+
+{% block content %}
+<!-- Transaction Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ transactions|length }}</h3>
+                <p>Total Transactions</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-icon">
+                <i class="fas fa-naira-sign"></i>
+            </div>
+            <div class="stat-info">
+                <h3>₦{{ total_volume|round(2) if total_volume else 0 }}</h3>
+                <p>Total Volume</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stat-info">
+                <h3>₦{{ today_volume|round(2) if today_volume else 0 }}</h3>
+                <p>Today's Volume</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ transactions|selectattr('type', 'equalto', 'deposit')|list|length }}</h3>
+                <p>Deposits</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="controls-section">
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search transactions..." onkeyup="filterTransactions()">
+        </div>
+    </div>
+    
+    <div class="filter-container">
+        <select id="typeFilter" onchange="filterTransactions()" class="filter-select">
+            <option value="">All Types</option>
+            <option value="deposit" {{ 'selected' if transaction_type == 'deposit' else '' }}>Deposits</option>
+            <option value="withdrawal" {{ 'selected' if transaction_type == 'withdrawal' else '' }}>Withdrawals</option>
+            <option value="income" {{ 'selected' if transaction_type == 'income' else '' }}>Income</option>
+            <option value="admin_credit" {{ 'selected' if transaction_type == 'admin_credit' else '' }}>Admin Credit</option>
+        </select>
+        
+        <select id="sortBy" onchange="sortTransactions()" class="filter-select">
+            <option value="date">Sort by Date</option>
+            <option value="amount">Sort by Amount</option>
+            <option value="type">Sort by Type</option>
+            <option value="user">Sort by User</option>
+        </select>
+    </div>
+</div>
+
+<!-- Transactions Table -->
+<div class="table-container">
+    <!-- Desktop Table View -->
+    <div class="desktop-table">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="transactionsTableBody">
+                {% for transaction in transactions %}
+                <tr class="transaction-row"
+                    data-id="{{ transaction.id }}"
+                    data-user="{{ transaction.user.username|lower if transaction.user else 'unknown' }}"
+                    data-type="{{ transaction.type }}"
+                    data-amount="{{ transaction.amount }}"
+                    data-date="{{ transaction.timestamp.strftime('%Y-%m-%d') if transaction.timestamp else '' }}">
+                    <td class="id-cell">
+                        <span class="transaction-id">#{{ transaction.id }}</span>
+                    </td>
+                    <td class="user-cell">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>{{ transaction.user.username if transaction.user else 'Unknown' }}</span>
+                        </div>
+                    </td>
+                    <td class="type-cell">
+                        <span class="badge bg-{{ 'success' if transaction.type == 'deposit' else 'primary' if transaction.type == 'income' else 'warning' if transaction.type == 'admin_credit' else 'secondary' }}">
+                            {{ transaction.type|title }}
+                        </span>
+                    </td>
+                    <td class="amount-cell">
+                        <span class="amount {{ 'text-success' if transaction.type in ['deposit', 'income', 'admin_credit'] else 'text-danger' }}">
+                            {{ '+' if transaction.type in ['deposit', 'income', 'admin_credit'] else '-' }}₦{{ transaction.amount|round(2) }}
+                        </span>
+                    </td>
+                    <td class="description-cell">
+                        {{ transaction.description if transaction.description else transaction.type|title }}
+                    </td>
+                    <td class="date-cell">
+                        {{ transaction.timestamp.strftime('%Y-%m-%d %H:%M') if transaction.timestamp else 'N/A' }}
+                    </td>
+                    <td class="actions-cell">
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" onclick="viewTransactionDetails({{ transaction.id }})" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Mobile Card View -->
+    <div class="mobile-cards" id="mobileCards">
+        {% for transaction in transactions %}
+        <div class="transaction-card"
+            data-id="{{ transaction.id }}"
+            data-user="{{ transaction.user.username|lower if transaction.user else 'unknown' }}"
+            data-type="{{ transaction.type }}"
+            data-amount="{{ transaction.amount }}"
+            data-date="{{ transaction.timestamp.strftime('%Y-%m-%d') if transaction.timestamp else '' }}">
+            <div class="card-header">
+                <div class="transaction-info">
+                    <div class="transaction-id">#{{ transaction.id }}</div>
+                    <div class="transaction-type">
+                        <span class="badge bg-{{ 'success' if transaction.type == 'deposit' else 'primary' if transaction.type == 'income' else 'warning' if transaction.type == 'admin_credit' else 'secondary' }}">
+                            {{ transaction.type|title }}
+                        </span>
+                    </div>
+                </div>
+                <div class="transaction-amount">
+                    <span class="amount {{ 'text-success' if transaction.type in ['deposit', 'income', 'admin_credit'] else 'text-danger' }}">
+                        {{ '+' if transaction.type in ['deposit', 'income', 'admin_credit'] else '-' }}₦{{ transaction.amount|round(2) }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">User:</span>
+                    <span class="info-value">{{ transaction.user.username if transaction.user else 'Unknown' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Description:</span>
+                    <span class="info-value">{{ transaction.description if transaction.description else transaction.type|title }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date:</span>
+                    <span class="info-value">{{ transaction.timestamp.strftime('%Y-%m-%d %H:%M') if transaction.timestamp else 'N/A' }}</span>
+                </div>
+            </div>
+            
+            <div class="card-actions">
+                <button class="action-btn view-btn" onclick="viewTransactionDetails({{ transaction.id }})" title="View Details">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Empty State -->
+<div id="emptyState" class="empty-state" style="display: none;">
+    <i class="fas fa-receipt fa-3x mb-3"></i>
+    <h3>No Transactions Found</h3>
+    <p>No transactions match your current search criteria.</p>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav aria-label="Transaction pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if current_page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ current_page - 1 }}{% if transaction_type %}&type={{ transaction_type }}{% endif %}">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for page_num in range(1, total_pages + 1) %}
+            {% if page_num == current_page %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+            {% elif page_num <= 3 or page_num >= total_pages - 2 or (page_num >= current_page - 1 and page_num <= current_page + 1) %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_num }}{% if transaction_type %}&type={{ transaction_type }}{% endif %}">{{ page_num }}</a>
+                </li>
+            {% elif page_num == 4 or page_num == total_pages - 3 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if current_page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ current_page + 1 }}{% if transaction_type %}&type={{ transaction_type }}{% endif %}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+/* Transaction management specific styles */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.15);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(40, 167, 69, 0.25);
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.stat-info p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.controls-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.search-container {
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 2px solid #e9ecef;
+    border-radius: 25px;
+    background: white;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.filter-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #28a745;
+}
+
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.desktop-table {
+    display: block;
+    overflow-x: auto;
+}
+
+.mobile-cards {
+    display: none;
+}
+
+.table {
+    margin: 0;
+}
+
+.table th {
+    background: #f8f9fa;
+    border: none;
+    font-weight: 600;
+    color: #333;
+    padding: 1rem 1.5rem;
+}
+
+.table td {
+    border: none;
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+}
+
+.transaction-id {
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.amount {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.view-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.view-btn:hover {
+    background: #545b62;
+    transform: scale(1.1);
+}
+
+.transaction-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.transaction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.transaction-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.transaction-amount .amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #666;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-top: 1px solid #f0f0f0;
+    background: #f8f9fa;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #999;
+}
+
+.empty-state i {
+    color: #ddd;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .stat-info h3 {
+        font-size: 1.5rem;
+    }
+    
+    .controls-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .search-container {
+        max-width: none;
+    }
+    
+    .filter-container {
+        flex-wrap: wrap;
+    }
+    
+    .desktop-table {
+        display: none;
+    }
+    
+    .mobile-cards {
+        display: block;
+    }
+    
+    .action-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-container {
+        flex-direction: column;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .transaction-info {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+</style>
+
+<script>
+// Search and filter functionality
+function filterTransactions() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const typeFilter = document.getElementById('typeFilter').value;
+    
+    const desktopRows = document.querySelectorAll('.transaction-row');
+    const mobileCards = document.querySelectorAll('.transaction-card');
+    
+    let visibleCount = 0;
+    
+    // Filter desktop table rows
+    desktopRows.forEach(row => {
+        const user = row.dataset.user;
+        const type = row.dataset.type;
+        const id = row.dataset.id;
+        
+        const matchesSearch = user.includes(searchTerm) || id.includes(searchTerm);
+        const matchesType = !typeFilter || type === typeFilter;
+        
+        if (matchesSearch && matchesType) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Filter mobile cards
+    mobileCards.forEach(card => {
+        const user = card.dataset.user;
+        const type = card.dataset.type;
+        const id = card.dataset.id;
+        
+        const matchesSearch = user.includes(searchTerm) || id.includes(searchTerm);
+        const matchesType = !typeFilter || type === typeFilter;
+        
+        if (matchesSearch && matchesType) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show/hide empty state
+    document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none';
+}
+
+function sortTransactions() {
+    const sortBy = document.getElementById('sortBy').value;
+    const tableBody = document.getElementById('transactionsTableBody');
+    const mobileContainer = document.getElementById('mobileCards');
+    
+    const desktopRows = Array.from(tableBody.querySelectorAll('.transaction-row'));
+    const mobileCards = Array.from(mobileContainer.querySelectorAll('.transaction-card'));
+    
+    // Sort desktop rows
+    desktopRows.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(sortBy) {
+            case 'date':
+                aVal = new Date(a.dataset.date);
+                bVal = new Date(b.dataset.date);
+                return bVal - aVal; // Most recent first
+            case 'amount':
+                aVal = parseFloat(a.dataset.amount);
+                bVal = parseFloat(b.dataset.amount);
+                return bVal - aVal; // Descending order
+            case 'type':
+                aVal = a.dataset.type;
+                bVal = b.dataset.type;
+                return aVal.localeCompare(bVal);
+            case 'user':
+                aVal = a.dataset.user;
+                bVal = b.dataset.user;
+                return aVal.localeCompare(bVal);
+            default:
+                return 0;
+        }
+    });
+    
+    // Sort mobile cards
+    mobileCards.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(sortBy) {
+            case 'date':
+                aVal = new Date(a.dataset.date);
+                bVal = new Date(b.dataset.date);
+                return bVal - aVal;
+            case 'amount':
+                aVal = parseFloat(a.dataset.amount);
+                bVal = parseFloat(b.dataset.amount);
+                return bVal - aVal;
+            case 'type':
+                aVal = a.dataset.type;
+                bVal = b.dataset.type;
+                return aVal.localeCompare(bVal);
+            case 'user':
+                aVal = a.dataset.user;
+                bVal = b.dataset.user;
+                return aVal.localeCompare(bVal);
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted elements
+    desktopRows.forEach(row => tableBody.appendChild(row));
+    mobileCards.forEach(card => mobileContainer.appendChild(card));
+}
+
+// Transaction management functions
+function viewTransactionDetails(transactionId) {
+    // Here you would open a modal or navigate to details page
+    alert(`View details for transaction #${transactionId}`);
+}
+
+// Apply filters from URL parameters on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get('type');
+    
+    if (typeParam) {
+        document.getElementById('typeFilter').value = typeParam;
+    }
+});
+</script>
+
+{% endblock %}

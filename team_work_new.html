@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Work - Fintech Finance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 50%, #1E5F99 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px 16px 100px 16px;
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+
+        .header-content {
+            width: 100%;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-logo {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-icon-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .invitation-section {
+            margin-bottom: 20px;
+        }
+
+        .invitation-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .invitation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .invitation-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .copy-btn {
+            background: #FF8C00;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .invitation-code {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .referral-levels {
+            margin-bottom: 20px;
+        }
+
+        .level-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .level-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .level-1 .level-icon {
+            background: #FFD700;
+            color: #333;
+        }
+
+        .level-2 .level-icon {
+            background: #87CEEB;
+            color: #333;
+        }
+
+        .level-3 .level-icon {
+            background: #CD7F32;
+            color: white;
+        }
+
+        .level-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .level-badges {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .reward-badge {
+            background: #FFD700;
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .view-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .level-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            transition: color 0.3s;
+            font-size: 12px;
+        }
+
+        .nav-item.active {
+            color: #4A90E2;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px 12px 100px 12px;
+            }
+            
+            .level-stats {
+                gap: 12px;
+            }
+            
+            .stat-value {
+                font-size: 18px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="team-body">
+    <!-- Header Section -->
+    <div class="team-header">
+        <div class="header-content">
+            <div class="header-info">
+                <div class="logo-section">
+                    <div class="app-logo">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="brand-name">Fintech</div>
+                </div>
+                <div class="header-icons">
+                    <button class="header-icon-btn">
+                        <i class="fas fa-globe"></i>
+                    </button>
+                    <button class="header-icon-btn">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="page-title">
+                <h1>Team Work</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invitation Code Section -->
+    <div class="invitation-section">
+        <div class="invitation-card">
+            <div class="invitation-header">
+                <span class="invitation-label">Invitation Code</span>
+                <button class="copy-btn" onclick="copyInvitationCode()">Copy</button>
+            </div>
+            <div class="invitation-code" id="referralCode">{{ user.referral_code or current_user.referral_code or 'Loading...' }}</div>
+        </div>
+    </div>
+
+    <!-- Referral Levels -->
+    <div class="referral-levels">
+        <!-- Level 1 -->
+        <div class="level-card level-1">
+            <div class="level-header">
+                <div class="level-info">
+                    <div class="level-icon">
+                        🥇
+                    </div>
+                    <span class="level-title">1st Level</span>
+                </div>
+                <div class="level-badges">
+                    <span class="reward-badge">Reward 24%</span>
+                    <button class="view-btn">View</button>
+                </div>
+            </div>
+            <div class="level-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ level1_referrals|length if level1_referrals else 0 }}</div>
+                    <div class="stat-label">Total People</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">₹{{ "%.2f"|format(level1_earnings or 0) }}</div>
+                    <div class="stat-label">Total Recharge</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">₹{{ "%.2f"|format(level1_commission or 0) }}</div>
+                    <div class="stat-label">Total Commission</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level 2 -->
+        <div class="level-card level-2">
+            <div class="level-header">
+                <div class="level-info">
+                    <div class="level-icon">
+                        🥈
+                    </div>
+                    <span class="level-title">2nd Level</span>
+                </div>
+                <div class="level-badges">
+                    <span class="reward-badge">Reward 4%</span>
+                    <button class="view-btn">View</button>
+                </div>
+            </div>
+            <div class="level-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ level2_referrals|length if level2_referrals else 0 }}</div>
+                    <div class="stat-label">Total People</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">₹{{ "%.2f"|format(level2_earnings or 0) }}</div>
+                    <div class="stat-label">Total Recharge</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">₹{{ "%.2f"|format(level2_commission or 0) }}</div>
+                    <div class="stat-label">Total Commission</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level 3 -->
+        <div class="level-card level-3">
+            <div class="level-header">
+                <div class="level-info">
+                    <div class="level-icon">
+                        🥉
+                    </div>
+                    <span class="level-title">3rd Level</span>
+                </div>
+                <div class="level-badges">
+                    <span class="reward-badge">Reward 2%</span>
+                    <button class="view-btn">View</button>
+                </div>
+            </div>
+            <div class="level-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ level3_referrals|length if level3_referrals else 0 }}</div>
+                    <div class="stat-label">Total People</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">₹{{ "%.2f"|format(level3_earnings or 0) }}</div>
+                    <div class="stat-label">Total Recharge</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">₹{{ "%.2f"|format(level3_commission or 0) }}</div>
+                    <div class="stat-label">Total Commission</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="{{ url_for('dashboard') }}" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('packages') }}" class="nav-item">
+            <i class="fas fa-box"></i>
+            <span>Plans</span>
+        </a>
+        <a href="{{ url_for('referral') }}" class="nav-item active">
+            <i class="fas fa-users"></i>
+            <span>Team</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </div>
+
+    <script>
+        let currentReferralCode = '{{ user.referral_code or current_user.referral_code or "DEMO123" }}';
+
+        // Function to fetch referral code from Flask app
+        async function fetchReferralCode() {
+            try {
+                const response = await fetch('/api/get-referral-code', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.referral_code) {
+                        currentReferralCode = data.referral_code;
+                        document.getElementById('referralCode').textContent = currentReferralCode;
+                    }
+                }
+            } catch (error) {
+                console.log('Using template referral code');
+                currentReferralCode = '{{ user.referral_code or current_user.referral_code or "DEMO123" }}';
+                document.getElementById('referralCode').textContent = currentReferralCode;
+            }
+        }
+
+        function copyInvitationCode() {
+            navigator.clipboard.writeText(currentReferralCode).then(function() {
+                // Show success message
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#FF8C00';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = currentReferralCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#FF8C00';
+                }, 2000);
+            });
+        }
+
+        // Add click handlers for view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('View detailed referrals for this level');
+            });
+        });
+
+        // Load referral code when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchReferralCode();
+        });
+    </script>
+</body>
+</html>

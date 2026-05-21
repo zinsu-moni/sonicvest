@@ -1,0 +1,350 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Balance - {{ user.name }} - Admin Panel{% endblock %}
+
+{% block page_title %}Add Balance to User Account{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="form-container">
+        <div class="user-info-header">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <h2>{{ user.name }}</h2>
+                <p class="user-email">{{ user.email }}</p>
+                <div class="current-balances">
+                    <div class="balance-item">
+                        <span class="balance-label">Recharge Balance:</span>
+                        <span class="balance-value">₦{{ (user.recharge_balance | default(0)) | format_number }}</span>
+                    </div>
+                    <div class="balance-item">
+                        <span class="balance-label">Main Balance:</span>
+                        <span class="balance-value">₦{{ (user.main_balance | default(0)) | format_number }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" id="addBalanceForm" class="balance-form">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="amount" class="form-label">Amount (₦)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" 
+                               min="0.01" step="0.01" required placeholder="Enter amount to add">
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="balance_type" class="form-label">Balance Type</label>
+                        <select class="form-control" id="balance_type" name="balance_type" required>
+                            <option value="">Select balance type</option>
+                            <option value="recharge">Recharge Balance</option>
+                            <option value="main">Main Balance</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" 
+                          rows="3" placeholder="Enter description for this transaction">Admin credit - Manual balance addition</textarea>
+            </div>
+
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <h4>Transaction Preview</h4>
+                <div class="preview-details">
+                    <div class="preview-item">
+                        <span>User:</span>
+                        <span>{{ user.name }}</span>
+                    </div>
+                    <div class="preview-item">
+                        <span>Amount:</span>
+                        <span id="previewAmount">₦0.00</span>
+                    </div>
+                    <div class="preview-item">
+                        <span>Balance Type:</span>
+                        <span id="previewBalanceType">-</span>
+                    </div>
+                    <div class="preview-item">
+                        <span>Current Balance:</span>
+                        <span id="previewCurrentBalance">₦0.00</span>
+                    </div>
+                    <div class="preview-item">
+                        <span>New Balance:</span>
+                        <span id="previewNewBalance">₦0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-plus-circle"></i> Add Balance
+                </button>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Users
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.user-info-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 10px;
+    border-left: 4px solid #2196f3;
+}
+
+.user-avatar {
+    margin-right: 20px;
+}
+
+.user-avatar i {
+    font-size: 60px;
+    color: #2196f3;
+}
+
+.user-details h2 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.user-email {
+    color: #666;
+    margin: 0 0 15px 0;
+}
+
+.current-balances {
+    display: flex;
+    gap: 30px;
+}
+
+.balance-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.balance-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.balance-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2196f3;
+}
+
+.balance-form .form-group {
+    margin-bottom: 20px;
+}
+
+.balance-form .form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.balance-form .form-control {
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.balance-form .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.preview-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.preview-section h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.preview-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.preview-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.preview-item:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    color: #28a745;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e5e9;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #20c997, #17a2b8);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+}
+
+.alert {
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .user-info-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .user-avatar {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .current-balances {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .preview-details {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const balanceTypeSelect = document.getElementById('balance_type');
+    const previewSection = document.getElementById('previewSection');
+    
+    const userBalances = {
+        recharge: {{ user.recharge_balance | default(0) }},
+        main: {{ user.main_balance | default(0) }}
+    };
+    
+    function updatePreview() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const balanceType = balanceTypeSelect.value;
+        
+        if (amount > 0 && balanceType) {
+            previewSection.style.display = 'block';
+            
+            document.getElementById('previewAmount').textContent = '₦' + amount.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('previewBalanceType').textContent = balanceType === 'recharge' ? 'Recharge Balance' : 'Main Balance';
+            
+            const currentBalance = userBalances[balanceType];
+            const newBalance = currentBalance + amount;
+            
+            document.getElementById('previewCurrentBalance').textContent = '₦' + currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('previewNewBalance').textContent = '₦' + newBalance.toLocaleString('en-US', {minimumFractionDigits: 2});
+        } else {
+            previewSection.style.display = 'none';
+        }
+    }
+    
+    amountInput.addEventListener('input', updatePreview);
+    balanceTypeSelect.addEventListener('change', updatePreview);
+    
+    // Form submission
+    document.getElementById('addBalanceForm').addEventListener('submit', function(e) {
+        const amount = parseFloat(amountInput.value);
+        const balanceType = balanceTypeSelect.value;
+        
+        if (!amount || amount <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid amount greater than 0.');
+            return;
+        }
+        
+        if (!balanceType) {
+            e.preventDefault();
+            alert('Please select a balance type.');
+            return;
+        }
+        
+        if (!confirm(`Are you sure you want to add ₦${amount.toLocaleString('en-US', {minimumFractionDigits: 2})} to ${balanceType === 'recharge' ? 'recharge' : 'main'} balance?`)) {
+            e.preventDefault();
+            return;
+        }
+        
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Balance...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}

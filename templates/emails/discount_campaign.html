@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Earning with Sonic Pay</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f1f2;
+            font-family: Arial, sans-serif;
+            color: #2a2a2a;
+        }
+
+        .container {
+            max-width: 620px;
+            margin: 24px auto;
+            background: #ffffff;
+            border: 1px solid #f0d9dc;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #9d1a2e 0%, #d7263d 100%);
+            padding: 28px 24px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 6px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            margin: 0;
+            color: #ffe8eb;
+        }
+
+        .content {
+            padding: 26px 24px;
+        }
+
+        .content p {
+            font-size: 14px;
+            line-height: 1.65;
+            margin: 0 0 14px;
+            color: #3a3a3a;
+        }
+
+        .offer-box {
+            border: 1px solid #f4c9cf;
+            background: #fff5f6;
+            border-left: 4px solid #d7263d;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 18px 0;
+        }
+
+        .offer-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #9d1a2e;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+
+        .offer-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #b21e35;
+            margin: 0;
+        }
+
+        .deadline {
+            margin-top: 8px;
+            color: #7f1d1d;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .message-box {
+            background: #fff9fa;
+            border: 1px solid #f0d9dc;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 18px 0;
+        }
+
+        .message-box p {
+            margin: 0;
+            color: #7a2633;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .packages {
+            margin: 16px 0 18px;
+            padding-left: 20px;
+        }
+
+        .packages li {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #3a3a3a;
+        }
+
+        .cta {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 12px 24px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            background: #d7263d;
+        }
+
+        .footer {
+            border-top: 1px solid #f3e5e7;
+            background: #fff9fa;
+            padding: 16px 24px 20px;
+            color: #7a5860;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .footer a {
+            color: #9d1a2e;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <p class="brand">Sonic Pay</p>
+            <p class="subtitle">Your Next Investment Opportunity</p>
+        </div>
+
+        <div class="content">
+            <p>Hello {{ name }},</p>
+
+            <div class="offer-box">
+                <div class="offer-label">Featured Packages</div>
+                <p class="offer-value">Start Today</p>
+                <div class="deadline">Choose your preferred package and begin earning.</div>
+            </div>
+
+            <div class="message-box">
+                <p>You are just a few steps away from making money on Sonic Pay. Get a package now and start earning
+                    massively.</p>
+            </div>
+
+            {% if package_offers %}
+            <p>Here are some packages you can start with today:</p>
+            <ul class="packages">
+                {% for offer in package_offers %}
+                <li><strong>{{ offer.name }}</strong>: N{{ offer.price }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <p>Tap below to choose your package and begin earning right away.</p>
+            <p><a href="{{ packages_url }}" class="cta">View Packages</a></p>
+        </div>
+
+        <div class="footer">
+            This is a promotional message sent to users without an active package purchase history.<br>
+            Need help? <a href="mailto:support@maxwealth.com">support@maxwealth.com</a>
+        </div>
+    </div>
+</body>
+
+</html>
