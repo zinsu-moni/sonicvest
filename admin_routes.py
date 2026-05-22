@@ -1307,6 +1307,7 @@ def new_package():
         price = data.get('price')
         daily_return_rate = data.get('daily_return_rate')
         duration_days = data.get('duration_days')
+        is_active = data.get('is_active')
         
         # Validation
         errors = []
@@ -1338,6 +1339,8 @@ def new_package():
         except (ValueError, TypeError):
             errors.append('Invalid duration format')
             duration_days = 0
+
+        is_active = True if str(is_active).lower() in ('1', 'true', 'on', 'yes') else False
         
         if errors:
             if request.is_json:
@@ -1355,8 +1358,8 @@ def new_package():
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT INTO package (name, description, price, daily_return_rate, duration_days, is_active, created_at)
-                VALUES (?, ?, ?, ?, ?, 1, datetime('now'))
-            ''', (name, description, price, daily_return_rate, duration_days))
+                VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            ''', (name, description, price, daily_return_rate, duration_days, is_active))
             
             package_id = cursor.lastrowid
             conn.commit()

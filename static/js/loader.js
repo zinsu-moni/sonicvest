@@ -24,7 +24,9 @@ class FinTechLoader {
         overlay.setAttribute('aria-busy', 'false');
         overlay.innerHTML = `
             <div class="loader-fintech" aria-hidden="false">
-                <div class="loader-logo" aria-hidden="true">🎯</div>
+                <div class="loader-logo" aria-hidden="true">
+                    <img src="/static/images/logo.svg" alt="" class="loader-logo-image">
+                </div>
                 <div class="loader" aria-hidden="true"></div>
                 <div class="loader-text">Loading...</div>
                 <div class="loader-subtitle">Please wait while we process your request</div>

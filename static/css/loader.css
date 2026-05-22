@@ -6,7 +6,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(4, 24, 18, 0.82);
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
@@ -33,10 +33,16 @@
 }
 
 .loader-logo {
-    font-size: 48px;
     margin-bottom: 20px;
-    color: #dc143c;
     animation: logoGlow 2s ease-in-out infinite alternate;
+}
+
+.loader-logo-image {
+    width: 180px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 .loader {
@@ -44,7 +50,7 @@
     height: 60px;
     margin: 20px auto;
     border: 4px solid rgba(255, 255, 255, 0.1);
-    border-left: 4px solid #dc143c;
+    border-left: 4px solid #33d17a;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     position: relative;
@@ -76,11 +82,13 @@
 
 @keyframes logoGlow {
     0% {
-        text-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+        transform: translateY(0px);
+        filter: drop-shadow(0 0 8px rgba(69, 217, 128, 0.35));
     }
 
     100% {
-        text-shadow: 0 0 20px rgba(220, 20, 60, 0.8);
+        transform: translateY(-2px);
+        filter: drop-shadow(0 0 14px rgba(69, 217, 128, 0.6));
     }
 }
 
@@ -112,7 +120,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #FFFFFF 0%, #F5F1E8 50%, #E8D4A0 100%);
+    background: linear-gradient(135deg, #04261d 0%, #0a3d2f 55%, #0f5a43 100%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -127,22 +135,22 @@
 
 .page-loader-content {
     text-align: center;
-    color: #5D4E37;
+    color: #e6fff2;
 }
 
 .page-loader-logo {
     font-size: 60px;
     margin-bottom: 20px;
     animation: logoGlow 2s ease-in-out infinite alternate;
-    color: #D4AF37;
+    color: #45d980;
 }
 
 .page-loader-spinner {
     width: 50px;
     height: 50px;
     margin: 20px auto;
-    border: 3px solid rgba(212, 175, 55, 0.2);
-    border-left: 3px solid #D4AF37;
+    border: 3px solid rgba(69, 217, 128, 0.2);
+    border-left: 3px solid #45d980;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -156,7 +164,7 @@
 .page-loader-progress {
     width: 200px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(69, 217, 128, 0.2);
     border-radius: 2px;
     margin: 20px auto;
     overflow: hidden;
@@ -164,7 +172,7 @@
 
 .page-loader-bar {
     height: 100%;
-    background: linear-gradient(90deg, #FFFFFF, #E8F4FF);
+    background: linear-gradient(90deg, #1fb35e, #78f0a3);
     border-radius: 2px;
     width: 0%;
     animation: loadProgress 3s ease-in-out infinite;

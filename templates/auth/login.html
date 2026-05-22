@@ -151,20 +151,15 @@
         }
 
         .login-logo {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #0B3D2E 0%, #0B6B4E 50%, #1F8A70 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 210px;
+            display: inline-block;
             margin-bottom: 20px;
-            box-shadow: 0 8px 24px rgba(11,61,46,0.2);
         }
 
-        .login-logo i {
-            font-size: 26px;
-            color: white;
+        .login-logo img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
         .login-title {
@@ -425,7 +420,7 @@
         <div class="login-form-section">
             <div class="login-header">
                 <div class="login-logo">
-                    <i class="fas fa-chart-line"></i>
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="SONICVEST">
                 </div>
                 <h1 class="login-title">Welcome Back</h1>
                 <p class="login-subtitle">Sign in to your SONICVEST account</p>

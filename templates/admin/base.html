@@ -89,10 +89,10 @@
 
         .admin-brand {
             color: white;
-            font-size: 24px;
-            font-weight: bold;
             text-decoration: none;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             padding: 15px 20px;
             margin-bottom: 20px;
         }
@@ -186,9 +186,24 @@
 
         .mobile-brand {
             color: white;
-            font-size: 20px;
-            font-weight: bold;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-logo {
+            width: 140px;
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .brand-label {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            opacity: 0.9;
         }
 
         .hamburger-menu {
@@ -242,7 +257,7 @@
     <div class="mobile-header">
         <div class="header-content">
             <a href="{{ url_for('admin.dashboard') }}" class="mobile-brand">
-                <i class="fas fa-shield-alt me-2"></i>Admin Panel
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="SONICVEST" class="brand-logo">
             </a>
             <button class="hamburger-menu" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars"></i>
@@ -256,7 +271,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="{{ url_for('admin.dashboard') }}" class="admin-brand">
-            <i class="fas fa-shield-alt me-2"></i>Admin Panel
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="SONICVEST" class="brand-logo">
+            <span class="brand-label">ADMIN</span>
         </a>
 
         <nav class="nav flex-column">

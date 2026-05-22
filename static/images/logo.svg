@@ -1,15 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
-  <!-- Background pill -->
-  <rect rx="8" ry="8" width="200" height="50" fill="none"/>
-  <!-- Icon circle -->
-  <circle cx="25" cy="25" r="21" fill="#1a3c6e"/>
-  <!-- Chart bars icon -->
-  <rect x="13" y="28" width="5" height="10" rx="1" fill="white"/>
-  <rect x="21" y="22" width="5" height="16" rx="1" fill="white"/>
-  <rect x="29" y="16" width="5" height="22" rx="1" fill="white"/>
-  <!-- Upward arrow on top bar -->
-  <polyline points="31.5,14 31.5,10 35.5,14" fill="none" stroke="#f0c040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Site name text -->
-  <text x="54" y="20" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="16" fill="#1a3c6e" letter-spacing="0.5">Sonic</text>
-  <text x="54" y="38" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="16" fill="#f0c040" letter-spacing="0.5">Pay</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" width="900" height="220" role="img" aria-label="SONICVEST logo">
+  <defs>
+    <linearGradient id="svGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78f0a3"/>
+      <stop offset="55%" stop-color="#45d980"/>
+      <stop offset="100%" stop-color="#1fb35e"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(16,8)">
+    <path fill="url(#svGreen)" d="M190 14c-54-15-119 14-129 58-8 34 18 54 67 69 40 12 58 20 56 36-2 22-31 34-73 34-33 0-63-8-89-25l-12 22c31 20 66 30 107 30 61 0 109-25 114-72 4-40-29-58-80-73-36-11-51-18-50-33 1-13 24-24 52-24 30 0 58 10 76 27l18-19c-19-18-45-28-77-30z"/>
+    <rect x="58" y="147" width="17" height="44" rx="3" fill="url(#svGreen)"/>
+    <rect x="81" y="136" width="17" height="55" rx="3" fill="url(#svGreen)"/>
+    <rect x="104" y="123" width="17" height="68" rx="3" fill="url(#svGreen)"/>
+    <rect x="127" y="110" width="17" height="81" rx="3" fill="url(#svGreen)"/>
+    <rect x="150" y="96" width="17" height="95" rx="3" fill="url(#svGreen)"/>
+    <path d="M112 124l90-72" stroke="url(#svGreen)" stroke-width="15" stroke-linecap="round" fill="none"/>
+    <path d="M184 45h43v43" stroke="url(#svGreen)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <text x="284" y="144" font-family="Montserrat, Poppins, 'Segoe UI', Arial, sans-serif" font-size="84" font-weight="800" letter-spacing="2" fill="#ffffff">SONICVEST</text>
 </svg>

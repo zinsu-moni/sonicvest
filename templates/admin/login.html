@@ -30,9 +30,10 @@
             margin-bottom: 30px;
         }
 
-        .admin-logo i {
-            font-size: 48px;
-            color: #667eea;
+        .admin-logo img {
+            width: 210px;
+            max-width: 100%;
+            height: auto;
             margin-bottom: 15px;
         }
 
@@ -86,7 +87,7 @@
 <body>
     <div class="login-container">
         <div class="admin-logo">
-            <i class="fas fa-shield-alt"></i>
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="SONICVEST">
             <h2>Admin Panel</h2>
             <p class="text-muted">SONICVEST</p>
         </div>
