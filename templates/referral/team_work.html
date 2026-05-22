@@ -323,22 +323,24 @@
     </div>
 
     <div class="bottom-nav">
-        <a href="{{ url_for('dashboard') }}" class="nav-item">
-            <i class="fas fa-home nav-icon"></i>
-            <span class="nav-label">Home</span>
-        </a>
-        <a href="{{ url_for('packages') }}" class="nav-item">
-            <i class="fas fa-box nav-icon"></i>
-            <span class="nav-label">Plans</span>
-        </a>
-        <a href="{{ url_for('referral') }}" class="nav-item active">
-            <i class="fas fa-users nav-icon"></i>
-            <span class="nav-label">Team</span>
-        </a>
-        <a href="{{ url_for('profile') }}" class="nav-item">
-            <i class="fas fa-user nav-icon"></i>
-            <span class="nav-label">Profile</span>
-        </a>
+        <div class="nav-items">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="{{ url_for('packages') }}" class="nav-item">
+                <i class="fas fa-box nav-icon"></i>
+                <span class="nav-label">Plans</span>
+            </a>
+            <a href="{{ url_for('referral') }}" class="nav-item active">
+                <i class="fas fa-users nav-icon"></i>
+                <span class="nav-label">Team</span>
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span class="nav-label">Profile</span>
+            </a>
+        </div>
     </div>
 
     <script>
