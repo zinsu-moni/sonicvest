@@ -1018,7 +1018,7 @@ def register():
             email = request.form.get('email')
             password = request.form.get('password')
             phone = request.form.get('phone', '').strip()
-            referral_code = request.form.get('referral_code', '').strip()
+            referral_code = (request.form.get('referral_code') or request.args.get('ref') or '').strip()
             
             # Validation
             if not all([name, email, password, phone]):
@@ -1203,7 +1203,7 @@ def buy_package(package_id):
                     user_id=user.id, 
                     package_id=package.id, 
                     is_active=True
-                ).first()
+                ).filter(UserPackage.end_date > utc_now()).first()
                 
                 if existing_package:
                     return jsonify({
@@ -1296,7 +1296,7 @@ def buy_package(package_id):
                     user_id=user.id, 
                     package_id=package.id, 
                     is_active=True
-                ).first()
+                ).filter(UserPackage.end_date > utc_now()).first()
                 
                 if existing_package:
                     flash(f'❌ Purchase Failed! You already have an active {package.name} package.', 'warning')
@@ -1652,30 +1652,30 @@ def referral():
         for ref in level2_referrals:
             level3_referrals.extend(User.query.filter_by(referred_by=ref.id).all())
         
-        # Calculate earnings and commissions based on deposit transactions
-        # Only count finalized deposits
-        accepted_statuses = ['completed', 'approved', 'processed']
+        # Calculate actual earned referral commissions credited to the current user.
+        def sum_referral_bonus(level_number=None):
+            query = db.session.query(db.func.coalesce(db.func.sum(Transaction.amount), 0.0)).filter(
+                Transaction.user_id == user.id,
+                Transaction.type == 'referral_bonus',
+                Transaction.status == 'completed'
+            )
 
-        def sum_deposits_for_users(users):
-            if not users:
-                return 0.0
-            user_ids = [u.id for u in users]
-            total = db.session.query(db.func.coalesce(db.func.sum(Transaction.amount), 0.0)).filter(
-                Transaction.user_id.in_(user_ids),
-                Transaction.type == 'deposit',
-                Transaction.status.in_(accepted_statuses)
-            ).scalar() or 0.0
+            if level_number is not None:
+                query = query.filter(Transaction.description.contains(f'Level {level_number} referral commission'))
+
+            total = query.scalar() or 0.0
             return float(total)
 
-        level1_earnings = sum_deposits_for_users(level1_referrals)
-        level2_earnings = sum_deposits_for_users(level2_referrals)
-        level3_earnings = sum_deposits_for_users(level3_referrals)
-        
-        level1_commission = level1_earnings * level1_rate
-        level2_commission = level2_earnings * level2_rate
-        level3_commission = level3_earnings * level3_rate
-        
-        total_commission = level1_commission + level2_commission + level3_commission
+        level1_commission = sum_referral_bonus(1)
+        level2_commission = sum_referral_bonus(2)
+        level3_commission = sum_referral_bonus(3)
+
+        total_commission = sum_referral_bonus()
+
+        # Keep these for template compatibility and future expansion.
+        level1_earnings = level1_commission
+        level2_earnings = level2_commission
+        level3_earnings = level3_commission
         total_referrals = len(level1_referrals) + len(level2_referrals) + len(level3_referrals)
         active_referrals = len([ref for ref in level1_referrals + level2_referrals + level3_referrals if ref.is_active])
         
