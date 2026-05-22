@@ -999,9 +999,16 @@ def require_login(f):
     return decorated_function
 
 # Routes
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        return register()
     return render_template('auth/register.html')
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
