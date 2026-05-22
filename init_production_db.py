@@ -63,6 +63,19 @@ def init_production_database():
                     print("✅ Database migration completed")
             except Exception as migration_error:
                 print(f"⚠️  Migration: {migration_error}")
+
+            # Normalize production defaults so hosted deployments use the same check-in bonus as local
+            try:
+                from app import execute_update
+
+                updated_rows = execute_update(
+                    'UPDATE system_settings SET daily_checkin_bonus = :bonus WHERE daily_checkin_bonus = 20 OR daily_checkin_bonus IS NULL',
+                    {'bonus': 100.0}
+                )
+                if updated_rows:
+                    print('✅ Daily check-in bonus normalized to ₦100')
+            except Exception as bonus_error:
+                print(f"⚠️  Bonus normalization: {bonus_error}")
             
             print("✅ Production database ready!")
             return True

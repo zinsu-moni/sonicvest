@@ -180,7 +180,7 @@ def settings():
             'welcome_bonus': 100.0,
             'minimum_deposit': 3000.0,
             'minimum_withdrawal': 2200.0,
-            'daily_checkin_bonus': 20.0,
+            'daily_checkin_bonus': 100.0,
             'withdrawal_fee_percentage': 11.0,
             'income_drop_hours': 24.0,
             'withdrawal_start_time': 9,

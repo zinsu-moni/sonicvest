@@ -29,7 +29,7 @@ SYSTEM_SETTINGS = {
     'WELCOME_BONUS': 100.0,
     'MINIMUM_DEPOSIT': 3000.0,
     'MINIMUM_WITHDRAWAL': 2200.0,
-    'DAILY_CHECKIN_BONUS': 20.0,
+    'DAILY_CHECKIN_BONUS': 100.0,
     'WITHDRAWAL_FEE_PERCENTAGE': 11.0,
     'INCOME_DROP_HOURS': 24.0,
     'WITHDRAWAL_START_TIME': 9,
@@ -927,7 +927,7 @@ class SystemSettings(db.Model):
     welcome_bonus = db.Column(db.Float, default=100.0)
     minimum_deposit = db.Column(db.Float, default=3000.0)
     minimum_withdrawal = db.Column(db.Float, default=2200.0)
-    daily_checkin_bonus = db.Column(db.Float, default=20.0)
+    daily_checkin_bonus = db.Column(db.Float, default=100.0)
     withdrawal_fee_percentage = db.Column(db.Float, default=11.0)
     income_drop_hours = db.Column(db.Float, default=24.0)
     withdrawal_start_time = db.Column(db.Integer, default=9)
@@ -950,7 +950,7 @@ def load_system_settings():
                     'WELCOME_BONUS': float(settings_row.get('welcome_bonus', 100.0) or 100.0),
                     'MINIMUM_DEPOSIT': float(settings_row.get('minimum_deposit', 3000.0) or 3000.0),
                     'MINIMUM_WITHDRAWAL': float(settings_row.get('minimum_withdrawal', 2200.0) or 2200.0),
-                    'DAILY_CHECKIN_BONUS': float(settings_row.get('daily_checkin_bonus', 20.0) or 20.0),
+                    'DAILY_CHECKIN_BONUS': float(settings_row.get('daily_checkin_bonus', 100.0) or 100.0),
                     'WITHDRAWAL_FEE_PERCENTAGE': float(settings_row.get('withdrawal_fee_percentage', 11.0) or 11.0),
                     'INCOME_DROP_HOURS': float(settings_row.get('income_drop_hours', 24.0) or 24.0),
                     'WITHDRAWAL_START_TIME': int(settings_row.get('withdrawal_start_time', 9) or 9),
@@ -969,7 +969,7 @@ def load_system_settings():
         'WELCOME_BONUS': 100.0,
         'MINIMUM_DEPOSIT': 3000.0,
         'MINIMUM_WITHDRAWAL': 2200.0,
-        'DAILY_CHECKIN_BONUS': 20.0,
+        'DAILY_CHECKIN_BONUS': 100.0,
         'WITHDRAWAL_FEE_PERCENTAGE': 11.0,
         'INCOME_DROP_HOURS': 24.0,
         'WITHDRAWAL_START_TIME': 9,
