@@ -424,6 +424,8 @@ def initialize_database():
             # Create all tables if they don't exist
             db.create_all()
             print("✅ Database tables ensured")
+
+            ensure_system_settings_schema()
             
             # Load system settings from DB
             SYSTEM_SETTINGS = load_system_settings()
@@ -529,6 +531,7 @@ def initialize_database():
                             referral_level1 REAL DEFAULT 0.15,
                             referral_level2 REAL DEFAULT 0.03,
                             referral_level3 REAL DEFAULT 0.01,
+                            deposit_gateway_mode VARCHAR(20) DEFAULT 'automatic',
                             is_active BOOLEAN DEFAULT 1,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         )
@@ -935,6 +938,7 @@ class SystemSettings(db.Model):
     referral_level1 = db.Column(db.Float, default=0.15)
     referral_level2 = db.Column(db.Float, default=0.03)
     referral_level3 = db.Column(db.Float, default=0.01)
+    deposit_gateway_mode = db.Column(db.String(20), default='automatic')
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=utc_now)
 
@@ -946,6 +950,7 @@ def load_system_settings():
         if has_app_context():
             settings_row = execute_one('SELECT * FROM system_settings LIMIT 1')
             if settings_row:
+                deposit_gateway_mode = (settings_row.get('deposit_gateway_mode') or 'automatic').strip().lower()
                 return {
                     'WELCOME_BONUS': float(settings_row.get('welcome_bonus', 100.0) or 100.0),
                     'MINIMUM_DEPOSIT': float(settings_row.get('minimum_deposit', 3000.0) or 3000.0),
@@ -955,6 +960,7 @@ def load_system_settings():
                     'INCOME_DROP_HOURS': float(settings_row.get('income_drop_hours', 24.0) or 24.0),
                     'WITHDRAWAL_START_TIME': int(settings_row.get('withdrawal_start_time', 9) or 9),
                     'WITHDRAWAL_END_TIME': int(settings_row.get('withdrawal_end_time', 17) or 17),
+                    'DEPOSIT_GATEWAY_MODE': deposit_gateway_mode if deposit_gateway_mode in ('manual', 'automatic') else 'automatic',
                     'REFERRAL_COMMISSIONS': {
                         'LEVEL_1': float(settings_row.get('referral_level1', 0.15) or 0.15),
                         'LEVEL_2': float(settings_row.get('referral_level2', 0.03) or 0.03),
@@ -974,12 +980,27 @@ def load_system_settings():
         'INCOME_DROP_HOURS': 24.0,
         'WITHDRAWAL_START_TIME': 9,
         'WITHDRAWAL_END_TIME': 17,
+        'DEPOSIT_GATEWAY_MODE': 'automatic',
         'REFERRAL_COMMISSIONS': {
             'LEVEL_1': 0.15,
             'LEVEL_2': 0.03,
             'LEVEL_3': 0.01
         }
     }
+
+
+def ensure_system_settings_schema():
+    """Add missing system_settings columns on existing databases."""
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE system_settings ADD COLUMN deposit_gateway_mode VARCHAR(20) DEFAULT 'automatic'"))
+        db.session.commit()
+        print("✅ System settings gateway mode column ensured")
+    except Exception as e:
+        db.session.rollback()
+        message = str(e).lower()
+        if 'duplicate column' not in message and 'already exists' not in message:
+            print(f"⚠️  System settings schema check: {e}")
 
 # Helper functions
 def get_current_user():
@@ -1394,16 +1415,34 @@ def buy_package(package_id):
 @require_login
 def deposit():
     user = get_current_user()
+    # Refresh SYSTEM_SETTINGS from DB
+    global SYSTEM_SETTINGS
+    SYSTEM_SETTINGS = load_system_settings()
+
+    deposit_gateway_mode = (SYSTEM_SETTINGS.get('DEPOSIT_GATEWAY_MODE') or 'automatic').lower()
+    if deposit_gateway_mode == 'manual':
+        return deposit_manual()
+    if deposit_gateway_mode == 'automatic':
+        return deposit_automatic()
+
+    return render_template('deposit/index.html', user=user)
+
+
+@app.route('/deposit/manual')
+@require_login
+def deposit_manual():
+    user = get_current_user()
+
     # Get bank details via execute_one
     bank_row = execute_one('SELECT * FROM bank_details WHERE is_active = TRUE LIMIT 1')
-    
+
     # Convert to object-like for template
     class DictObj:
         def __init__(self, d):
             if not d:
                 d = {}
             self.__dict__.update(d)
-    
+
     if not bank_row:
         bank_details = DictObj({
             'bank_name': '',
@@ -1412,15 +1451,32 @@ def deposit():
         })
     else:
         bank_details = DictObj(bank_row)
-    
-    # Refresh SYSTEM_SETTINGS from DB
+
     global SYSTEM_SETTINGS
     SYSTEM_SETTINGS = load_system_settings()
-    
-    return render_template('deposit/manual.html', 
-                         user=user, 
+
+    deposit_gateway_mode = (SYSTEM_SETTINGS.get('DEPOSIT_GATEWAY_MODE') or 'automatic').lower()
+    if deposit_gateway_mode != 'manual':
+        return redirect(url_for('deposit'))
+
+    return render_template('deposit/manual.html',
+                         user=user,
                          minimum_deposit=SYSTEM_SETTINGS['MINIMUM_DEPOSIT'],
                          bank_details=bank_details)
+
+
+@app.route('/deposit/automatic')
+@require_login
+def deposit_automatic():
+    user = get_current_user()
+    global SYSTEM_SETTINGS
+    SYSTEM_SETTINGS = load_system_settings()
+
+    deposit_gateway_mode = (SYSTEM_SETTINGS.get('DEPOSIT_GATEWAY_MODE') or 'automatic').lower()
+    if deposit_gateway_mode != 'automatic':
+        return redirect(url_for('deposit'))
+
+    return render_template('deposit/gtr.html', user=user)
 
 @app.route('/deposit_history')
 @require_login
@@ -2072,14 +2128,16 @@ def process_deposit():
         db.session.add(pending_transaction)
         db.session.commit()
         
-        # Create payment with GTR Pay API
-        callback_url = url_for('gtr_payment_callback', _external=True)
-        return_url = url_for('payment_success', _external=True)
+        # Create payment with the documented NekPayment collection API
+        callback_url = build_public_url('gtr_payment_callback')
+        return_url = build_public_url('payment_success')
         payment_result = gtr_pay_service.create_deposit_payment(
             amount=amount,
             reference=reference,
             callback_url=callback_url,
-            return_url=return_url
+            page_url=return_url,
+            mch_return_msg=reference,
+            goods_name='SONICVEST Deposit',
         )
         
         if payment_result['success']:
@@ -2109,7 +2167,7 @@ def process_deposit():
 
 @app.route('/gtr-payment-callback', methods=['POST'])
 def gtr_payment_callback():
-    """Handle GTR Pay IPN (Instant Payment Notification) callback"""
+    """Handle NekPayment IPN (Instant Payment Notification) callback"""
     try:
         # Get callback data
         if request.is_json:
@@ -2123,31 +2181,32 @@ def gtr_payment_callback():
         if verification_result['success']:
             # Find the pending transaction
             reference = verification_result['reference']
-            transaction = Transaction.query.filter_by(reference=reference, status='pending').first()
+            transaction = Transaction.query.filter_by(reference=reference).first()
             
             if transaction:
-                # Update transaction status
-                transaction.status = 'completed'
-                
-                # Add amount to user's recharge balance
-                user = User.query.get(transaction.user_id)
-                user.recharge_balance += transaction.amount
-                
-                db.session.commit()
-                
-                # Log successful payment
-                print(f"✅ GTR Pay deposit confirmed: {reference} - ₦{transaction.amount}")
-                
-                return "SUCCESS", 200  # GTR Pay expects "SUCCESS" response
+                if transaction.status != 'completed':
+                    # Update transaction status
+                    transaction.status = 'completed'
+
+                    # Add amount to user's recharge balance
+                    user = User.query.get(transaction.user_id)
+                    user.recharge_balance += transaction.amount
+
+                    db.session.commit()
+
+                    # Log successful payment
+                    print(f"✅ NekPayment deposit confirmed: {reference} - ₦{transaction.amount}")
+
+                return "success", 200  # Provider expects lowercase success response
             else:
                 print(f"⚠️ Transaction not found: {reference}")
                 return "TRANSACTION_NOT_FOUND", 404
         else:
-            print(f"❌ GTR Pay callback verification failed: {verification_result['message']}")
+            print(f"❌ NekPayment callback verification failed: {verification_result['message']}")
             return "VERIFICATION_FAILED", 400
             
     except Exception as e:
-        print(f"❌ Error processing GTR Pay callback: {str(e)}")
+        print(f"❌ Error processing NekPayment callback: {str(e)}")
         return "ERROR", 500
 
 @app.route('/deposit/receipt/<reference>')
@@ -2242,8 +2301,13 @@ def process_manual_deposit():
 @require_login
 def payment_success():
     """Handle successful payment return from GTR Pay"""
-    reference = request.args.get('orderNo') or request.args.get('reference')
-    trade_no = request.args.get('tradeNo') or request.args.get('trade_no')
+    reference = (
+        request.args.get('mchOrderNo')
+        or request.args.get('mch_order_no')
+        or request.args.get('reference')
+        or request.args.get('orderNo')
+    )
+    trade_no = request.args.get('tradeNo') or request.args.get('trade_no') or request.args.get('orderNo')
     
     if reference:
         return redirect(url_for('deposit_receipt', reference=reference, trade_no=trade_no))
@@ -3259,6 +3323,7 @@ if __name__ == '__main__':
         with app.app_context():
             # Try to create all tables
             db.create_all()
+            ensure_system_settings_schema()
             
             # Initialize admin database
             from admin_routes import init_admin_db

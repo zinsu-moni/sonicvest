@@ -256,6 +256,14 @@
                 </div>
 
                 <div class="nav-item">
+                    <a href="{{ url_for('admin.settings') }}"
+                        class="nav-link {{ 'active' if request.endpoint == 'admin.settings' }}">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                </div>
+
+                <div class="nav-item">
                     <a href="{{ url_for('gtr_payments') }}"
                         class="nav-link {{ 'active' if request.endpoint == 'gtr_payments' }}">
                         <i class="fas fa-credit-card"></i>

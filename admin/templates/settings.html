@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block page_title %}System Settings{% endblock %}
+
+{% block content %}
+<style>
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        max-width: 960px;
+    }
+
+    .settings-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .settings-card h2 {
+        margin: 0 0 18px;
+        font-size: 20px;
+        color: #0f172a;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #334155;
+        font-size: 14px;
+    }
+
+    .field input,
+    .field select {
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 14px;
+        background: #fff;
+    }
+
+    .field .hint {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .full {
+        grid-column: 1 / -1;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .save-btn {
+        background: #0f766e;
+        color: #fff;
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .mode-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="settings-grid">
+    <div class="settings-card">
+        <h2>System Settings</h2>
+        <form method="POST">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="welcome_bonus">Welcome Bonus</label>
+                    <input type="number" step="0.01" name="welcome_bonus" id="welcome_bonus" value="{{ system_settings.welcome_bonus }}">
+                </div>
+                <div class="field">
+                    <label for="minimum_deposit">Minimum Deposit</label>
+                    <input type="number" step="0.01" name="minimum_deposit" id="minimum_deposit" value="{{ system_settings.minimum_deposit }}">
+                </div>
+                <div class="field">
+                    <label for="minimum_withdrawal">Minimum Withdrawal</label>
+                    <input type="number" step="0.01" name="minimum_withdrawal" id="minimum_withdrawal" value="{{ system_settings.minimum_withdrawal }}">
+                </div>
+                <div class="field">
+                    <label for="daily_checkin_bonus">Daily Check-in Bonus</label>
+                    <input type="number" step="0.01" name="daily_checkin_bonus" id="daily_checkin_bonus" value="{{ system_settings.daily_checkin_bonus }}">
+                </div>
+                <div class="field">
+                    <label for="withdrawal_fee_percentage">Withdrawal Fee %</label>
+                    <input type="number" step="0.01" name="withdrawal_fee_percentage" id="withdrawal_fee_percentage" value="{{ system_settings.withdrawal_fee_percentage }}">
+                </div>
+                <div class="field">
+                    <label for="income_drop_hours">Income Drop Hours</label>
+                    <input type="number" step="1" name="income_drop_hours" id="income_drop_hours" value="{{ system_settings.income_drop_hours }}">
+                </div>
+                <div class="field">
+                    <label for="withdrawal_start_time">Withdrawal Start Time</label>
+                    <input type="number" step="1" name="withdrawal_start_time" id="withdrawal_start_time" value="{{ system_settings.withdrawal_start_time }}">
+                </div>
+                <div class="field">
+                    <label for="withdrawal_end_time">Withdrawal End Time</label>
+                    <input type="number" step="1" name="withdrawal_end_time" id="withdrawal_end_time" value="{{ system_settings.withdrawal_end_time }}">
+                </div>
+                <div class="field full">
+                    <label for="deposit_gateway_mode">Deposit Gateway Mode</label>
+                    <select name="deposit_gateway_mode" id="deposit_gateway_mode">
+                        <option value="automatic" {% if system_settings.deposit_gateway_mode == 'automatic' %}selected{% endif %}>Automatic gateway</option>
+                        <option value="manual" {% if system_settings.deposit_gateway_mode == 'manual' %}selected{% endif %}>Manual gateway</option>
+                    </select>
+                    <div class="hint">This controls which deposit screen users see when they open the deposit page.</div>
+                </div>
+                <div class="field full">
+                    <div class="mode-badge">Current mode: {{ system_settings.deposit_gateway_mode | default('automatic') | capitalize }}</div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" name="save_system" value="1" class="save-btn">Save Settings</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -187,7 +187,8 @@ def settings():
             'withdrawal_end_time': 17,
             'referral_level1': 0.15,
             'referral_level2': 0.03,
-            'referral_level3': 0.01
+            'referral_level3': 0.01,
+            'deposit_gateway_mode': 'automatic'
         })
         system_settings_dict = execute_one(settings_sql)
     
@@ -238,6 +239,10 @@ def settings():
         
         # Handle system settings
         if 'save_system' in request.form:
+            deposit_gateway_mode = request.form.get('deposit_gateway_mode', 'automatic').strip().lower()
+            if deposit_gateway_mode not in ('manual', 'automatic'):
+                deposit_gateway_mode = 'automatic'
+
             system_values = {
                 'welcome_bonus': float(request.form.get('welcome_bonus', 100.0)),
                 'minimum_deposit': float(request.form.get('minimum_deposit', 3000.0)),
@@ -249,7 +254,8 @@ def settings():
                 'withdrawal_end_time': int(request.form.get('withdrawal_end_time', 17)),
                 'referral_level1': float(request.form.get('referral_level1', 15)) / 100.0,
                 'referral_level2': float(request.form.get('referral_level2', 3)) / 100.0,
-                'referral_level3': float(request.form.get('referral_level3', 1)) / 100.0
+                'referral_level3': float(request.form.get('referral_level3', 1)) / 100.0,
+                'deposit_gateway_mode': deposit_gateway_mode
             }
 
             if system_settings_dict and system_settings_dict.get('id'):
@@ -265,7 +271,8 @@ def settings():
                         withdrawal_end_time = :withdrawal_end_time,
                         referral_level1 = :referral_level1,
                         referral_level2 = :referral_level2,
-                        referral_level3 = :referral_level3
+                        referral_level3 = :referral_level3,
+                        deposit_gateway_mode = :deposit_gateway_mode
                     WHERE id = :id
                 '''
                 saved = execute_update(update_sql, {'id': system_settings_dict['id'], **system_values})
@@ -276,12 +283,14 @@ def settings():
                         daily_checkin_bonus, withdrawal_fee_percentage, income_drop_hours,
                         withdrawal_start_time, withdrawal_end_time,
                         referral_level1, referral_level2, referral_level3,
+                        deposit_gateway_mode,
                         is_active, created_at
                     ) VALUES (
                         :welcome_bonus, :minimum_deposit, :minimum_withdrawal,
                         :daily_checkin_bonus, :withdrawal_fee_percentage, :income_drop_hours,
                         :withdrawal_start_time, :withdrawal_end_time,
                         :referral_level1, :referral_level2, :referral_level3,
+                        :deposit_gateway_mode,
                         TRUE, CURRENT_TIMESTAMP
                     )
                 '''

@@ -118,6 +118,18 @@
                        value="{{ (system_settings.referral_level3 or 0.01) * 100 }}" required>
             </div>
         </div>
+
+        <h4 class="mt-4 mb-3">Deposit Gateway</h4>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <label for="deposit_gateway_mode" class="form-label">Default Deposit Gateway</label>
+                <select class="form-select" id="deposit_gateway_mode" name="deposit_gateway_mode" required>
+                    <option value="automatic" {% if (system_settings.deposit_gateway_mode or 'automatic') == 'automatic' %}selected{% endif %}>Automatic gateway</option>
+                    <option value="manual" {% if system_settings.deposit_gateway_mode == 'manual' %}selected{% endif %}>Manual gateway</option>
+                </select>
+                <small class="text-muted">Controls which deposit screen users see first on the deposit page.</small>
+            </div>
+        </div>
         
         <button type="submit" name="save_system" value="1" class="btn btn-primary">
             <i class="fas fa-save me-2"></i>Save System Settings
