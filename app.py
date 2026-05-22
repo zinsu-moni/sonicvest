@@ -1136,6 +1136,8 @@ def dashboard():
     total_invested = sum(up.amount_invested for up in user_packages)
     total_earned = sum(up.get_earnings_to_date() for up in active_packages)
     daily_income = sum(up.daily_return for up in active_packages)
+    daily_cashback = daily_income
+    recent_transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.created_at.desc()).limit(5).all()
     
     return render_template('dashboard/index.html', 
                          user=user, 
@@ -1145,7 +1147,9 @@ def dashboard():
                          active_packages=active_packages,
                          total_invested=total_invested,
                          total_earned=total_earned,
-                         daily_income=daily_income)
+                         daily_income=daily_income,
+                         daily_cashback=daily_cashback,
+                         recent_transactions=recent_transactions)
 
 @app.route('/packages')
 def packages():
