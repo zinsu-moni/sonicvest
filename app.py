@@ -1137,6 +1137,28 @@ def dashboard():
     total_earned = sum(up.get_earnings_to_date() for up in active_packages)
     daily_income = sum(up.daily_return for up in active_packages)
     daily_cashback = daily_income
+
+    income_scheduler_status = 'No active package yet'
+    if active_packages:
+        next_payout_times = []
+        for user_package in active_packages:
+            if user_package.last_payout:
+                next_payout_times.append(user_package.last_payout + timedelta(hours=SYSTEM_SETTINGS['INCOME_DROP_HOURS']))
+            else:
+                next_payout_times.append(user_package.start_date + timedelta(hours=SYSTEM_SETTINGS['INCOME_DROP_HOURS']))
+
+        next_payout_time = min(next_payout_times)
+        seconds_remaining = max(0, int((next_payout_time - utc_now()).total_seconds()))
+        hours_remaining, remainder = divmod(seconds_remaining, 3600)
+        minutes_remaining = remainder // 60
+
+        if seconds_remaining == 0:
+            income_scheduler_status = 'Auto payout due now'
+        elif hours_remaining > 0:
+            income_scheduler_status = f'Auto payout in {hours_remaining}h {minutes_remaining}m'
+        else:
+            income_scheduler_status = f'Auto payout in {minutes_remaining}m'
+
     recent_transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.created_at.desc()).limit(5).all()
     
     return render_template('dashboard/index.html', 
@@ -1149,6 +1171,7 @@ def dashboard():
                          total_earned=total_earned,
                          daily_income=daily_income,
                          daily_cashback=daily_cashback,
+                         income_scheduler_status=income_scheduler_status,
                          recent_transactions=recent_transactions)
 
 @app.route('/packages')

@@ -439,6 +439,19 @@
             text-decoration: none;
         }
 
+        .checkin-status {
+            background: rgba(11, 61, 46, 0.9);
+            color: white;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 10px 24px rgba(11, 61, 46, 0.18);
+            max-width: 150px;
+            text-align: right;
+        }
+
         .checkin-fab button {
             border: none;
             border-radius: 999px;
@@ -482,6 +495,14 @@
             .checkin-fab {
                 right: 14px;
                 bottom: 110px;
+                gap: 8px;
+                align-items: flex-end;
+            }
+
+            .checkin-status {
+                max-width: 130px;
+                padding: 7px 10px;
+                font-size: 10px;
             }
 
             .checkin-fab button {
@@ -698,6 +719,7 @@
     </div>
 
     <div class="checkin-fab">
+        <div class="checkin-status">{{ income_scheduler_status }}</div>
         <button type="button" id="checkinBtn" onclick="claimDailyBonus()">
             <span class="checkin-icon"><i class="fas fa-bolt"></i></span>
             <span id="checkinBtnText">Check in</span>
