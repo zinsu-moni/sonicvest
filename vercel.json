@@ -3,7 +3,7 @@
   "version": 2,
   "framework": null,
   "functions": {
-    "app.py": {
+    "api/index.py": {
       "maxDuration": 30,
       "excludeFiles": "{__pycache__/**,*.pyc,test_*.py,tests/**,admin/requirements.txt,*.md,*.txt,static/uploads/**}"
     }
@@ -22,7 +22,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/app.py"
+      "destination": "/api/index.py"
     }
   ],
   "env": {
