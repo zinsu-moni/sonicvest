@@ -301,7 +301,7 @@
                     <h4>Level 1 Referrals</h4>
                     <p>Direct referrals ({{ level1_referrals|length if level1_referrals else 0 }} users)</p>
                 </div>
-                <div class="badge">15% Commission</div>
+                <div class="badge">{{ level1_rate_pct }}% Commission</div>
             </div>
 
             <div class="commission-item">
@@ -309,7 +309,7 @@
                     <h4>Level 2 Referrals</h4>
                     <p>Your team's referrals ({{ level2_referrals|length if level2_referrals else 0 }} users)</p>
                 </div>
-                <div class="badge">3% Commission</div>
+                <div class="badge">{{ level2_rate_pct }}% Commission</div>
             </div>
 
             <div class="commission-item">
@@ -317,7 +317,7 @@
                     <h4>Level 3 Referrals</h4>
                     <p>Extended team ({{ level3_referrals|length if level3_referrals else 0 }} users)</p>
                 </div>
-                <div class="badge">1% Commission</div>
+                <div class="badge">{{ level3_rate_pct }}% Commission</div>
             </div>
         </div>
     </div>

@@ -146,7 +146,7 @@ def settings():
         # Create default bank details
         insert_sql = '''
             INSERT INTO bank_details (bank_name, account_number, account_name, is_active, created_at)
-            VALUES (:bank_name, :account_number, :account_name, 1, CURRENT_TIMESTAMP)
+            VALUES (:bank_name, :account_number, :account_name, TRUE, CURRENT_TIMESTAMP)
         '''
         execute_insert(insert_sql, {
             'bank_name': '',
@@ -195,42 +195,50 @@ def settings():
     system_settings = DictObj(system_settings_dict)
     
     if request.method == 'POST':
+        save_failed = False
+
         # Handle bank details
-        if 'save_bank' in request.form and bank_details_dict and 'id' in bank_details_dict:
-            update_sql = '''
-                UPDATE bank_details
-                SET bank_name = :bank_name,
-                    account_number = :account_number,
-                    account_name = :account_name
-                WHERE id = :id
-            '''
-            execute_update(update_sql, {
-                'id': bank_details_dict['id'],
-                'bank_name': request.form.get('bank_name', '').strip(),
-                'account_number': request.form.get('account_number', '').strip(),
-                'account_name': request.form.get('account_name', '').strip()
-            })
-            flash('Bank details saved successfully!', 'success')
+        if 'save_bank' in request.form:
+            bank_name = request.form.get('bank_name', '').strip()
+            account_number = request.form.get('account_number', '').strip()
+            account_name = request.form.get('account_name', '').strip()
+
+            if bank_details_dict and bank_details_dict.get('id'):
+                update_sql = '''
+                    UPDATE bank_details
+                    SET bank_name = :bank_name,
+                        account_number = :account_number,
+                        account_name = :account_name
+                    WHERE id = :id
+                '''
+                saved = execute_update(update_sql, {
+                    'id': bank_details_dict['id'],
+                    'bank_name': bank_name,
+                    'account_number': account_number,
+                    'account_name': account_name
+                })
+            else:
+                insert_sql = '''
+                    INSERT INTO bank_details (bank_name, account_number, account_name, is_active, created_at)
+                    VALUES (:bank_name, :account_number, :account_name, TRUE, CURRENT_TIMESTAMP)
+                '''
+                saved = execute_insert(insert_sql, {
+                    'bank_name': bank_name,
+                    'account_number': account_number,
+                    'account_name': account_name
+                })
+
+            if saved:
+                flash('Bank details saved successfully!', 'success')
+                bank_details_dict = execute_one(bank_sql)
+                bank_details = DictObj(bank_details_dict)
+            else:
+                save_failed = True
+                flash('Failed to save bank details.', 'error')
         
         # Handle system settings
-        if 'save_system' in request.form and system_settings_dict and 'id' in system_settings_dict:
-            update_sql = '''
-                UPDATE system_settings
-                SET welcome_bonus = :welcome_bonus,
-                    minimum_deposit = :minimum_deposit,
-                    minimum_withdrawal = :minimum_withdrawal,
-                    daily_checkin_bonus = :daily_checkin_bonus,
-                    withdrawal_fee_percentage = :withdrawal_fee_percentage,
-                    income_drop_hours = :income_drop_hours,
-                    withdrawal_start_time = :withdrawal_start_time,
-                    withdrawal_end_time = :withdrawal_end_time,
-                    referral_level1 = :referral_level1,
-                    referral_level2 = :referral_level2,
-                    referral_level3 = :referral_level3
-                WHERE id = :id
-            '''
-            execute_update(update_sql, {
-                'id': system_settings_dict['id'],
+        if 'save_system' in request.form:
+            system_values = {
                 'welcome_bonus': float(request.form.get('welcome_bonus', 100.0)),
                 'minimum_deposit': float(request.form.get('minimum_deposit', 3000.0)),
                 'minimum_withdrawal': float(request.form.get('minimum_withdrawal', 2200.0)),
@@ -242,19 +250,57 @@ def settings():
                 'referral_level1': float(request.form.get('referral_level1', 15)) / 100.0,
                 'referral_level2': float(request.form.get('referral_level2', 3)) / 100.0,
                 'referral_level3': float(request.form.get('referral_level3', 1)) / 100.0
-            })
-            flash('System settings saved successfully!', 'success')
-            
-            # Also refresh SYSTEM_SETTINGS in app.py!
-            try:
-                from app import SYSTEM_SETTINGS
-                from app import load_system_settings
-                import importlib
-                import app
-                importlib.reload(app)
-                app.SYSTEM_SETTINGS = app.load_system_settings()
-            except:
-                pass
+            }
+
+            if system_settings_dict and system_settings_dict.get('id'):
+                update_sql = '''
+                    UPDATE system_settings
+                    SET welcome_bonus = :welcome_bonus,
+                        minimum_deposit = :minimum_deposit,
+                        minimum_withdrawal = :minimum_withdrawal,
+                        daily_checkin_bonus = :daily_checkin_bonus,
+                        withdrawal_fee_percentage = :withdrawal_fee_percentage,
+                        income_drop_hours = :income_drop_hours,
+                        withdrawal_start_time = :withdrawal_start_time,
+                        withdrawal_end_time = :withdrawal_end_time,
+                        referral_level1 = :referral_level1,
+                        referral_level2 = :referral_level2,
+                        referral_level3 = :referral_level3
+                    WHERE id = :id
+                '''
+                saved = execute_update(update_sql, {'id': system_settings_dict['id'], **system_values})
+            else:
+                insert_sql = '''
+                    INSERT INTO system_settings (
+                        welcome_bonus, minimum_deposit, minimum_withdrawal,
+                        daily_checkin_bonus, withdrawal_fee_percentage, income_drop_hours,
+                        withdrawal_start_time, withdrawal_end_time,
+                        referral_level1, referral_level2, referral_level3,
+                        is_active, created_at
+                    ) VALUES (
+                        :welcome_bonus, :minimum_deposit, :minimum_withdrawal,
+                        :daily_checkin_bonus, :withdrawal_fee_percentage, :income_drop_hours,
+                        :withdrawal_start_time, :withdrawal_end_time,
+                        :referral_level1, :referral_level2, :referral_level3,
+                        TRUE, CURRENT_TIMESTAMP
+                    )
+                '''
+                saved = execute_insert(insert_sql, system_values)
+
+            if saved:
+                flash('System settings saved successfully!', 'success')
+                system_settings_dict = execute_one(settings_sql)
+                system_settings = DictObj(system_settings_dict)
+
+                # Refresh the in-process cache used by the main app.
+                try:
+                    import app as app_module
+                    app_module.SYSTEM_SETTINGS = app_module.load_system_settings()
+                except Exception as refresh_error:
+                    print(f"⚠️  Could not refresh app SYSTEM_SETTINGS: {refresh_error}")
+            else:
+                save_failed = True
+                flash('Failed to save system settings.', 'error')
         
         return redirect(url_for('admin.settings'))
     

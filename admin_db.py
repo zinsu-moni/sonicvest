@@ -17,6 +17,13 @@ def set_db(database):
 def get_db():
     """Get the database instance with proper app context"""
     global db
+    try:
+        active_db = current_app.extensions.get('sqlalchemy')
+        if active_db is not None:
+            db = active_db
+            return db
+    except Exception:
+        pass
     if db is None:
         # Try to import from app
         try:

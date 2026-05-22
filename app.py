@@ -1357,7 +1357,7 @@ def buy_package(package_id):
 def deposit():
     user = get_current_user()
     # Get bank details via execute_one
-    bank_row = execute_one('SELECT * FROM bank_details WHERE is_active = 1 LIMIT 1')
+    bank_row = execute_one('SELECT * FROM bank_details WHERE is_active = TRUE LIMIT 1')
     
     # Convert to object-like for template
     class DictObj:
@@ -1621,6 +1621,13 @@ def referral():
         return redirect(url_for('login'))
     
     try:
+        global SYSTEM_SETTINGS
+        SYSTEM_SETTINGS = load_system_settings()
+        referral_rates = SYSTEM_SETTINGS.get('REFERRAL_COMMISSIONS', {})
+        level1_rate = float(referral_rates.get('LEVEL_1', 0.15))
+        level2_rate = float(referral_rates.get('LEVEL_2', 0.03))
+        level3_rate = float(referral_rates.get('LEVEL_3', 0.01))
+
         # Get level 1 referrals (direct referrals)
         level1_referrals = User.query.filter_by(referred_by=user.id).all()
         
@@ -1653,9 +1660,9 @@ def referral():
         level2_earnings = sum_deposits_for_users(level2_referrals)
         level3_earnings = sum_deposits_for_users(level3_referrals)
         
-        level1_commission = level1_earnings * SYSTEM_SETTINGS['REFERRAL_COMMISSIONS']['LEVEL_1']
-        level2_commission = level2_earnings * SYSTEM_SETTINGS['REFERRAL_COMMISSIONS']['LEVEL_2']
-        level3_commission = level3_earnings * SYSTEM_SETTINGS['REFERRAL_COMMISSIONS']['LEVEL_3']
+        level1_commission = level1_earnings * level1_rate
+        level2_commission = level2_earnings * level2_rate
+        level3_commission = level3_earnings * level3_rate
         
         total_commission = level1_commission + level2_commission + level3_commission
         total_referrals = len(level1_referrals) + len(level2_referrals) + len(level3_referrals)
@@ -1674,6 +1681,9 @@ def referral():
             'level1_commission': level1_commission,
             'level2_commission': level2_commission,
             'level3_commission': level3_commission,
+            'level1_rate_pct': round(level1_rate * 100, 2),
+            'level2_rate_pct': round(level2_rate * 100, 2),
+            'level3_rate_pct': round(level3_rate * 100, 2),
             'total_referrals': total_referrals,
             'active_referrals': active_referrals,
             'total_commission': total_commission
