@@ -1150,7 +1150,18 @@ def dashboard():
 @app.route('/packages')
 def packages():
     all_packages = Package.query.filter_by(is_active=True).all()
-    return render_template('package/index.html', packages=all_packages)
+    current_user = get_current_user() if 'user_id' in session else None
+    user_packages = []
+    if current_user:
+        user_packages = UserPackage.query.filter_by(user_id=current_user.id).all()
+
+    return render_template(
+        'package/index.html',
+        packages=all_packages,
+        user_packages=user_packages,
+        user=current_user,
+        current_user=current_user,
+    )
 
 @app.route('/package/<int:package_id>')
 def package_details(package_id):
