@@ -2416,7 +2416,7 @@ def withdrawal_receipt(withdrawal_id):
         user=user,
         withdrawal=withdrawal,
         transaction=txn,
-        business_name='Max Wealth',
+        business_name='SONICVEST',
         current_time=datetime.now()
     )
 
