@@ -1573,6 +1573,8 @@ def transactions():
     
     return render_template('transaction/income_record.html', 
                          user=user,
+                         user_transactions=user_transactions,
+                         transactions=user_transactions,
                          income_transactions=income_transactions,
                          other_transactions=other_transactions,
                          total_package_income=total_package_income,
