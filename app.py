@@ -54,9 +54,15 @@ app = Flask(__name__,
 # Security: Use environment variable for SECRET_KEY in production
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'your-secret-key-change-this-in-production'
 
-# Database configuration - FORCE SQLite for now
-database_url = f'sqlite:///{os.path.join(BASE_DIR, "maxwealth.db")}'
-print(f"✅ Using SQLite database: {database_url}")
+# Database configuration - prefer PostgreSQL via DATABASE_URL, fallback to local SQLite
+database_url = (os.environ.get('DATABASE_URL') or '').strip()
+if database_url:
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    print(f"✅ Using PostgreSQL database: {database_url[:60]}...")
+else:
+    database_url = f'sqlite:///{os.path.join(BASE_DIR, "maxwealth.db")}'
+    print(f"⚠️ DATABASE_URL not set, using SQLite database: {database_url}")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
