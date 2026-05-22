@@ -1454,6 +1454,8 @@ def withdrawal_history():
 @require_login
 def withdrawal():
     user = get_current_user()
+    global SYSTEM_SETTINGS
+    SYSTEM_SETTINGS = load_system_settings()
     # Determine if user lacks an active (non-expired) package to trigger modal instead of redirect
     require_package = UserPackage.query.filter(
         UserPackage.user_id == user.id,
@@ -1509,6 +1511,8 @@ def withdrawal():
 @require_login
 def request_withdrawal():
     user = get_current_user()
+    global SYSTEM_SETTINGS
+    SYSTEM_SETTINGS = load_system_settings()
     # Determine if user lacks an active (non-expired) package to trigger modal instead of redirect
     require_package = UserPackage.query.filter(
         UserPackage.user_id == user.id,
