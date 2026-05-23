@@ -28,8 +28,13 @@
                         <input type="text" class="form-control" name="transfer_id" value="{{ suggested_transfer_id }}" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Bank Code</label>
-                        <input type="text" class="form-control" name="bank_code" value="{{ default_bank_code }}" placeholder="NGR044" required>
+                        <label class="form-label">Bank</label>
+                        <select class="form-select" name="bank_code" required>
+                            {% for code, name in bank_options %}
+                                <option value="{{ code }}" {% if code == default_bank_code %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text small text-muted">Select the recipient bank by name. The gateway bank code configured in settings will be used by default; update mapping if your provider requires specific codes.</div>
                     </div>
                     <div class="col-md-8">
                         <label class="form-label">Recipient Name</label>
