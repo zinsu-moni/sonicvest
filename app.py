@@ -1476,7 +1476,7 @@ def deposit_automatic():
     if deposit_gateway_mode != 'automatic':
         return redirect(url_for('deposit'))
 
-    return render_template('deposit/gtr.html', user=user)
+    return render_template('deposit/gtr.html', user=user, minimum_deposit=SYSTEM_SETTINGS['MINIMUM_DEPOSIT'])
 
 @app.route('/deposit_history')
 @require_login
@@ -2097,6 +2097,8 @@ def claim_bonus():
 def process_deposit():
     """Handle GTR Pay deposit processing"""
     user = get_current_user()
+    global SYSTEM_SETTINGS
+    SYSTEM_SETTINGS = load_system_settings()
     
     amount = request.form.get('amount')
     payment_method = request.form.get('payment_method', 'gtr_pay')

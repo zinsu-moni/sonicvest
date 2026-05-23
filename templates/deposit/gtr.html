@@ -228,7 +228,7 @@
                     <label for="amount" style="display: block; margin-bottom: 10px; color: #2c3e50; font-weight: bold;">
                         <i class="fas fa-naira-sign"></i> Enter Amount
                     </label>
-                    <input type="number" id="amount" class="amount-input" placeholder="3000" min="3000" step="50"
+                    <input type="number" id="amount" class="amount-input" placeholder="{{ "{:,.0f}".format(minimum_deposit|default(3000)) }}" min="{{ minimum_deposit|default(3000)|int }}" step="50"
                         oninput="updatePaymentInfo()">
                 </div>
 
@@ -277,6 +277,8 @@
 
     <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
     <script>
+        const minimumDeposit = {{ minimum_deposit|default(3000)|int }};
+
         function selectAmount(amount) {
             // Remove selection from all buttons
             document.querySelectorAll('.quick-amount').forEach(btn => {
@@ -295,7 +297,7 @@
 
         function updatePaymentInfo() {
             const amount = parseFloat(document.getElementById('amount').value) || 0;
-            const minAmount = 3000;
+            const minAmount = minimumDeposit;
 
             if (amount >= minAmount) {
                 document.getElementById('payBtn').disabled = false;
@@ -317,8 +319,8 @@
         function processPayment() {
             const amount = parseFloat(document.getElementById('amount').value);
 
-            if (!amount || amount < 3000) {
-                showToast('Please enter a valid amount (minimum ₦3,000)', 'warning');
+            if (!amount || amount < minimumDeposit) {
+                showToast(`Please enter a valid amount (minimum ₦${minimumDeposit.toLocaleString()})`, 'warning');
                 return;
             }
 
