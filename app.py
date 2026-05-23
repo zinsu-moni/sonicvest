@@ -1476,7 +1476,16 @@ def deposit_automatic():
     if deposit_gateway_mode != 'automatic':
         return redirect(url_for('deposit'))
 
-    return render_template('deposit/gtr.html', user=user, minimum_deposit=SYSTEM_SETTINGS['MINIMUM_DEPOSIT'])
+    provider_min = float(getattr(gtr_pay_service, 'min_amount', 0.0) or 0.0)
+    provider_max = float(getattr(gtr_pay_service, 'max_amount', 0.0) or 0.0)
+    effective_min = max(float(SYSTEM_SETTINGS['MINIMUM_DEPOSIT']), provider_min)
+
+    return render_template(
+        'deposit/gtr.html',
+        user=user,
+        minimum_deposit=effective_min,
+        maximum_deposit=provider_max,
+    )
 
 @app.route('/deposit_history')
 @require_login
@@ -2108,8 +2117,15 @@ def process_deposit():
     
     try:
         amount = float(amount)
-        if amount < SYSTEM_SETTINGS['MINIMUM_DEPOSIT']:
-            return jsonify({'success': False, 'message': f'Minimum deposit amount is ₦{SYSTEM_SETTINGS["MINIMUM_DEPOSIT"]:,.0f}'})
+        provider_min = float(getattr(gtr_pay_service, 'min_amount', 0.0) or 0.0)
+        provider_max = float(getattr(gtr_pay_service, 'max_amount', 0.0) or 0.0)
+        effective_min = max(float(SYSTEM_SETTINGS['MINIMUM_DEPOSIT']), provider_min)
+
+        if amount < effective_min:
+            return jsonify({'success': False, 'message': f'Minimum automatic deposit amount is ₦{effective_min:,.0f}'})
+
+        if provider_max and amount > provider_max:
+            return jsonify({'success': False, 'message': f'Maximum automatic deposit amount is ₦{provider_max:,.0f}'})
         
         # Generate unique reference with timestamp
         import secrets

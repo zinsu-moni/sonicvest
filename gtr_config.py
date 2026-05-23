@@ -19,6 +19,16 @@ def _bool_env(name: str, default: bool) -> bool:
     return value in ('1', 'true', 'yes', 'on')
 
 
+def _float_env(name: str, default: float) -> float:
+    value = (os.environ.get(name) or '').strip()
+    if not value:
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+
 GTR_CONFIG = {
     'MERCHANT_ID': os.environ.get('NEKPAY_MERCHANT_ID', '999300111'),
     'SECRET_KEY': os.environ.get('NEKPAY_SECRET_KEY', 'e8a4cdd0ccdb4d2b9ca6212453c5e40c'),
@@ -26,4 +36,6 @@ GTR_CONFIG = {
     'BANK_CODE': os.environ.get('NEKPAY_BANK_CODE', 'NGR044'),
     'ENABLED': _bool_env('NEKPAY_ENABLED', True),
     'BASE_URL': os.environ.get('NEKPAY_BASE_URL', 'https://api.nekpayment.com/pay/web'),
+    'MIN_AMOUNT': _float_env('NEKPAY_MIN_AMOUNT', 500.0),
+    'MAX_AMOUNT': _float_env('NEKPAY_MAX_AMOUNT', 10000000.0),
 }

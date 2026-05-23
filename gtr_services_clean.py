@@ -15,6 +15,8 @@ class GTRPayService:
             self.bank_code = GTR_CONFIG.get('BANK_CODE', 'NGR044')
             self.base_url = GTR_CONFIG.get('BASE_URL', 'https://api.nekpayment.com/pay/web')
             self.enabled = GTR_CONFIG.get('ENABLED', True)
+            self.min_amount = float(GTR_CONFIG.get('MIN_AMOUNT', 500.0) or 0.0)
+            self.max_amount = float(GTR_CONFIG.get('MAX_AMOUNT', 10000000.0) or 0.0)
         except ImportError:
             print('⚠️ GTR Config not found - using defaults')
             self.mch_id = mch_id or '999300111'
@@ -23,6 +25,8 @@ class GTRPayService:
             self.bank_code = 'NGR044'
             self.base_url = 'https://api.nekpayment.com/pay/web'
             self.enabled = True
+            self.min_amount = 500.0
+            self.max_amount = 100000000.0
 
     def build_sign_digest(self, data, secret_key):
         """Build the documented MD5 signature string."""
@@ -62,6 +66,17 @@ class GTRPayService:
                 }
 
             amount_value = float(amount)
+            if self.min_amount and amount_value < self.min_amount:
+                return {
+                    'success': False,
+                    'message': f'Minimum automatic deposit is ₦{self.min_amount:,.0f}',
+                }
+            if self.max_amount and amount_value > self.max_amount:
+                return {
+                    'success': False,
+                    'message': f'Maximum automatic deposit is ₦{self.max_amount:,.0f}',
+                }
+
             order_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             resolved_page_url = page_url or return_url
             resolved_pay_type = str(pay_type or self.pay_type)

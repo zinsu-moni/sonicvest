@@ -237,9 +237,9 @@
                     <div class="quick-amount" onclick="selectAmount(3000)">₦3,000</div>
                     <div class="quick-amount" onclick="selectAmount(5000)">₦5,000</div>
                     <div class="quick-amount" onclick="selectAmount(7000)">₦7,000</div>
+                    <div class="quick-amount" onclick="selectAmount(8000)">₦8,000</div>
+                    <div class="quick-amount" onclick="selectAmount(9000)">₦9,000</div>
                     <div class="quick-amount" onclick="selectAmount(10000)">₦10,000</div>
-                    <div class="quick-amount" onclick="selectAmount(20000)">₦20,000</div>
-                    <div class="quick-amount" onclick="selectAmount(50000)">₦50,000</div>
                 </div>
 
                 <!-- Payment Button -->
@@ -278,8 +278,14 @@
     <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
     <script>
         const minimumDeposit = {{ minimum_deposit|default(3000)|int }};
+        const maximumDeposit = {{ maximum_deposit|default(10000)|int }};
 
         function selectAmount(amount) {
+            if (maximumDeposit && amount > maximumDeposit) {
+                showToast(`Maximum automatic deposit is ₦${maximumDeposit.toLocaleString()}`, 'warning');
+                return;
+            }
+
             // Remove selection from all buttons
             document.querySelectorAll('.quick-amount').forEach(btn => {
                 btn.classList.remove('selected');
@@ -298,8 +304,9 @@
         function updatePaymentInfo() {
             const amount = parseFloat(document.getElementById('amount').value) || 0;
             const minAmount = minimumDeposit;
+            const maxAmount = maximumDeposit;
 
-            if (amount >= minAmount) {
+            if (amount >= minAmount && (!maxAmount || amount <= maxAmount)) {
                 document.getElementById('payBtn').disabled = false;
                 document.getElementById('paymentInfo').style.display = 'block';
 
@@ -321,6 +328,11 @@
 
             if (!amount || amount < minimumDeposit) {
                 showToast(`Please enter a valid amount (minimum ₦${minimumDeposit.toLocaleString()})`, 'warning');
+                return;
+            }
+
+            if (maximumDeposit && amount > maximumDeposit) {
+                showToast(`Please enter a valid amount (maximum ₦${maximumDeposit.toLocaleString()})`, 'warning');
                 return;
             }
 
