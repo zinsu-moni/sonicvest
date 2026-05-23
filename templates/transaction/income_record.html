@@ -211,6 +211,34 @@
             font-weight: 500;
         }
 
+        .transaction-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .transaction-status.completed {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .transaction-status.pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .transaction-status.failed {
+            background: #FEE2E2;
+            color: #B91C1C;
+        }
+
         .transaction-amount {
             font-size: 17px;
             font-weight: 900;
@@ -339,16 +367,38 @@
         {% if user_transactions %}
         <div class="transaction-list">
             {% for transaction in user_transactions %}
+            {% set is_deposit_completed = transaction.type == 'deposit' and transaction.status == 'completed' %}
+            {% set is_withdrawal_success = transaction.type == 'withdrawal' and transaction.status in ['completed', 'approved', 'processed'] %}
+            {% set is_transaction_pending = transaction.status == 'pending' %}
             <div class="transaction-item">
-                <div class="transaction-icon {{ 'income' if transaction.type in ['package_income', 'daily_bonus', 'referral_bonus', 'deposit'] else 'withdrawal' if transaction.type == 'withdrawal' else 'deposit' }}">
+                <div class="transaction-icon {{ 'income' if transaction.type in ['package_income', 'daily_bonus', 'referral_bonus'] else 'deposit' if transaction.type == 'deposit' else 'withdrawal' }}">
                     <i class="fas fa-{{ 'arrow-down' if transaction.type in ['package_income', 'daily_bonus', 'referral_bonus', 'deposit'] else 'arrow-up' }}"></i>
                 </div>
                 <div class="transaction-info">
                     <div class="transaction-title">{{ transaction.type.replace('_', ' ').title() }}</div>
                     <div class="transaction-date">{{ transaction.created_at.strftime('%b %d, %Y %H:%M') }}</div>
+                    {% if transaction.type == 'deposit' or transaction.type == 'withdrawal' %}
+                    <div class="transaction-status {{ 'completed' if is_deposit_completed or is_withdrawal_success else 'pending' if is_transaction_pending else transaction.status }}">
+                        {% if is_deposit_completed or is_withdrawal_success %}
+                        <i class="fas fa-check-circle"></i> Completed
+                        {% elif is_transaction_pending %}
+                        <i class="fas fa-hourglass-half"></i> Pending
+                        {% elif transaction.status == 'failed' %}
+                        <i class="fas fa-times-circle"></i> Failed
+                        {% else %}
+                        <i class="fas fa-circle-notch"></i> {{ transaction.status|title }}
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="transaction-amount {{ 'positive' if transaction.type in ['package_income', 'daily_bonus', 'referral_bonus', 'deposit'] else 'negative' }}">
-                    {{ '+' if transaction.type in ['package_income', 'daily_bonus', 'referral_bonus', 'deposit'] else '-' }}₦{{ transaction.amount | format_number }}
+                <div class="transaction-amount {{ 'positive' if transaction.type in ['package_income', 'daily_bonus', 'referral_bonus'] or is_deposit_completed else 'negative' if transaction.type == 'withdrawal' or (transaction.type == 'deposit' and not is_deposit_completed) else 'positive' }}">
+                    {% if transaction.type == 'deposit' %}
+                        {% if is_deposit_completed %}+{% else %}~{% endif %}
+                    {% elif transaction.type == 'withdrawal' %}
+                        -
+                    {% else %}
+                        +
+                    {% endif %}₦{{ transaction.amount | format_number }}
                 </div>
             </div>
             {% endfor %}

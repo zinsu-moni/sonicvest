@@ -1546,14 +1546,16 @@ def withdrawal_history():
     withdrawals = Withdrawal.query.filter_by(
         user_id=user.id
     ).order_by(Withdrawal.created_at.desc()).all()
+
+    successful_statuses = {'completed', 'approved', 'processed'}
     
     # Calculate withdrawal statistics using the actual fee from database
-    total_withdrawals = sum(w.amount for w in withdrawals if w.status == 'completed')
+    total_withdrawals = sum(w.amount for w in withdrawals if w.status in successful_statuses)
     pending_withdrawals = sum(w.amount for w in withdrawals if w.status == 'pending')
-    successful_withdrawals = len([w for w in withdrawals if w.status == 'completed'])
+    successful_withdrawals = len([w for w in withdrawals if w.status in successful_statuses])
     
     # Calculate total fees paid (use actual fees from database)
-    total_fees_paid = sum(w.fee for w in withdrawals if w.status == 'completed' and w.fee)
+    total_fees_paid = sum(w.fee for w in withdrawals if w.status in successful_statuses and w.fee)
     
     # Get current withdrawal fee rate from system settings
     withdrawal_fee_rate = SYSTEM_SETTINGS['WITHDRAWAL_FEE_PERCENTAGE']
@@ -1682,6 +1684,52 @@ def transactions():
     
     # Get all transactions for the user, ordered by most recent
     user_transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.created_at.desc()).all()
+
+    successful_withdrawal_statuses = {'completed', 'approved', 'processed'}
+
+    # Confirm withdrawal transaction status from the source withdrawal record when possible.
+    # This keeps the history page aligned with the admin-reviewed withdrawal status.
+    for transaction in user_transactions:
+        if transaction.type != 'withdrawal':
+            continue
+
+        linked_withdrawal = None
+
+        if transaction.reference:
+            reference_match = re.match(r'^WD-(\d+)$', transaction.reference)
+            if reference_match:
+                linked_withdrawal = Withdrawal.query.filter_by(
+                    id=int(reference_match.group(1)),
+                    user_id=user.id
+                ).first()
+
+        if not linked_withdrawal and transaction.amount < 0:
+            withdrawal_amount = abs(transaction.amount)
+            matching_withdrawals = [
+                withdrawal for withdrawal in user.withdrawals
+                if abs(withdrawal.amount - withdrawal_amount) < 0.01
+            ]
+
+            if len(matching_withdrawals) == 1:
+                linked_withdrawal = matching_withdrawals[0]
+            elif matching_withdrawals:
+                matching_withdrawals.sort(
+                    key=lambda withdrawal: abs((withdrawal.created_at - transaction.created_at).total_seconds())
+                    if withdrawal.created_at and transaction.created_at else 0
+                )
+                closest_withdrawal = matching_withdrawals[0]
+                if closest_withdrawal.created_at and transaction.created_at:
+                    delta_seconds = abs((closest_withdrawal.created_at - transaction.created_at).total_seconds())
+                    if delta_seconds <= 3600:
+                        linked_withdrawal = closest_withdrawal
+
+        if linked_withdrawal:
+            if linked_withdrawal.status in successful_withdrawal_statuses:
+                transaction.status = 'completed'
+            elif linked_withdrawal.status in ['rejected', 'cancelled']:
+                transaction.status = 'failed'
+            elif linked_withdrawal.status == 'pending':
+                transaction.status = 'pending'
     
     # Separate transactions by type for better display
     income_transactions = [t for t in user_transactions if t.type in ['package_income', 'daily_bonus', 'referral_bonus']]
@@ -2191,7 +2239,21 @@ def process_deposit():
         
         # Create payment with the documented NekPayment collection API
         callback_url = build_public_url('gtr_payment_callback')
-        return_url = build_public_url('payment_success')
+        return_url = build_public_url('payment_return')
+        public_base_url = os.environ.get('APP_BASE_URL', '').strip()
+        if public_base_url and any(host in callback_url or host in return_url for host in ('127.0.0.1', 'localhost')):
+            db.session.delete(pending_transaction)
+            db.session.commit()
+            print(f"⚠️ Blocking gateway request because APP_BASE_URL is public but callbacks are local: callback={callback_url}, return={return_url}")
+            return jsonify({
+                'success': False,
+                'message': 'Set APP_BASE_URL to your public domain before creating payments. Gateway callback URLs cannot use localhost.',
+            })
+        if any(host in callback_url or host in return_url for host in ('127.0.0.1', 'localhost')):
+            print('⚠️ Using localhost callback URLs for local testing; gateway request will still be sent.')
+
+        print(f"🔄 Creating deposit payment: reference={reference}, amount={amount}, callback={callback_url}, return={return_url}")
+
         payment_result = gtr_pay_service.create_deposit_payment(
             amount=amount,
             reference=reference,
@@ -2200,6 +2262,8 @@ def process_deposit():
             mch_return_msg=reference,
             goods_name='SONICVEST Deposit',
         )
+
+        print(f"📦 Deposit gateway result for {reference}: {payment_result}")
         
         if payment_result['success']:
             # Return payment URL for redirect
@@ -2208,7 +2272,9 @@ def process_deposit():
                 'payment_url': payment_result['payment_url'],
                 'reference': reference,
                 'trade_no': payment_result['trade_no'],
-                'message': 'Payment created successfully. Redirecting to GTR Pay...'
+                'trade_result': payment_result.get('trade_result'),
+                'message': 'Payment created successfully. Redirecting to GTR Pay...',
+                'raw_response': payment_result.get('raw_response'),
             })
         else:
             # Clean up pending transaction
@@ -2217,7 +2283,8 @@ def process_deposit():
             
             return jsonify({
                 'success': False,
-                'message': f'Payment creation failed: {payment_result["message"]}'
+                'message': f'Payment creation failed: {payment_result["message"]}',
+                'raw_response': payment_result.get('raw_response'),
             })
         
     except ValueError:
@@ -2297,6 +2364,91 @@ def deposit_receipt(reference):
                          business_name="Max Wealth",
                          current_time=datetime.now())
 
+
+@app.route('/payment/status/<reference>')
+@require_login
+def payment_status(reference):
+    """Check whether a deposit has been confirmed by the gateway callback."""
+    user = get_current_user()
+    transaction = Transaction.query.filter_by(
+        reference=reference,
+        user_id=user.id,
+        type='deposit'
+    ).first()
+
+    if not transaction:
+        return jsonify({'success': False, 'message': 'Transaction not found'}), 404
+
+    return jsonify({
+        'success': True,
+        'reference': reference,
+        'status': transaction.status,
+        'completed': transaction.status == 'completed',
+        'retry_after': 3 if transaction.status != 'completed' else 0,
+        'redirect_url': url_for('dashboard') if transaction.status == 'completed' else None,
+    })
+
+
+@app.route('/payment/confirm/<reference>', methods=['POST'])
+@require_login
+def payment_confirm(reference):
+    """Ask NekPayment to verify a deposit before crediting the account."""
+    user = get_current_user()
+    transaction = Transaction.query.filter_by(
+        reference=reference,
+        user_id=user.id,
+        type='deposit'
+    ).first()
+
+    if not transaction:
+        return jsonify({'success': False, 'completed': False, 'message': 'Transaction not found'}), 404
+
+    payload = request.get_json(silent=True) or request.form.to_dict() or {}
+    trade_no = payload.get('trade_no') or payload.get('tradeNo') or request.args.get('trade_no') or request.args.get('tradeNo')
+
+    if transaction.status == 'completed':
+        return jsonify({
+            'success': True,
+            'completed': True,
+            'reference': reference,
+            'status': 'completed',
+            'message': 'Payment already confirmed',
+            'redirect_url': url_for('deposit_receipt', reference=reference, trade_no=trade_no or f'GTR{reference}', stay=1),
+        })
+
+    verification = gtr_pay_service.verify_deposit_payment(
+        reference=reference,
+        trade_no=trade_no,
+        amount=transaction.amount,
+    )
+
+    if verification.get('success') and verification.get('verified'):
+        transaction.status = 'completed'
+        user.recharge_balance += transaction.amount
+        db.session.commit()
+
+        print(f"✅ NekPayment deposit verified on confirm: {reference} - ₦{transaction.amount}")
+
+        return jsonify({
+            'success': True,
+            'completed': True,
+            'reference': reference,
+            'status': 'completed',
+            'message': verification.get('message') or 'Payment confirmed successfully',
+            'gateway_response': verification.get('raw_response'),
+            'redirect_url': url_for('deposit_receipt', reference=reference, trade_no=trade_no or f'GTR{reference}', stay=1),
+        })
+
+    return jsonify({
+        'success': False,
+        'completed': False,
+        'reference': reference,
+        'status': transaction.status,
+        'message': verification.get('message') or 'Payment is still pending confirmation',
+        'gateway_response': verification.get('raw_response'),
+        'redirect_url': None,
+    })
+
 @app.route('/process_manual_deposit', methods=['POST'])
 @require_login
 def process_manual_deposit():
@@ -2358,10 +2510,11 @@ def process_manual_deposit():
         print(f"Error processing manual deposit: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred. Please try again.'})
 
+@app.route('/payment/return')
 @app.route('/payment/success')
 @require_login
-def payment_success():
-    """Handle successful payment return from GTR Pay"""
+def payment_return():
+    """Handle the gateway return and move the user back into the app."""
     reference = (
         request.args.get('mchOrderNo')
         or request.args.get('mch_order_no')
@@ -2369,12 +2522,35 @@ def payment_success():
         or request.args.get('orderNo')
     )
     trade_no = request.args.get('tradeNo') or request.args.get('trade_no') or request.args.get('orderNo')
+    trade_result = request.args.get('tradeResult') or request.args.get('trade_result') or request.args.get('result')
+    user = get_current_user()
     
-    if reference:
-        return redirect(url_for('deposit_receipt', reference=reference, trade_no=trade_no))
-    else:
-        flash('Payment completed successfully!', 'success')
+    if not reference:
+        flash('Payment submitted. Waiting for gateway confirmation.', 'info')
         return redirect(url_for('dashboard'))
+
+    transaction = Transaction.query.filter_by(reference=reference, type='deposit', user_id=user.id).first()
+    if not transaction:
+        flash('Payment session not found. Please try again.', 'error')
+        return redirect(url_for('deposit'))
+
+    if trade_result not in (None, '', '1', 'SUCCESS', 'success'):
+        flash('Payment was not successful. Please try again.', 'error')
+        return redirect(url_for('deposit'))
+
+    if transaction.status == 'completed':
+        flash('Payment confirmed successfully.', 'success')
+        return redirect(url_for('dashboard'))
+
+    from datetime import datetime
+    return render_template(
+        'deposit/gtr_return.html',
+        transaction=transaction,
+        user=user,
+        trade_no=trade_no,
+        business_name='Max Wealth',
+        current_time=datetime.now(),
+    )
 
 @app.route('/test/receipt')
 @require_login
@@ -2497,16 +2673,19 @@ def process_withdrawal():
                 status='pending'
             )
             
+            db.session.add(withdrawal)
+            db.session.flush()
+
             # Create transaction record for balance deduction
             transaction = Transaction(
                 user_id=user.id,
                 type='withdrawal',
                 amount=-total_deduction,  # Negative because it's a deduction
                 description=f'Withdrawal request: NGN{amount:,.0f} (Fee: NGN{fee:,.0f})',
-                status='pending'
+                status='pending',
+                reference=f'WD-{withdrawal.id:06d}'
             )
             
-            db.session.add(withdrawal)
             db.session.add(transaction)
             db.session.commit()
 

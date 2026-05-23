@@ -231,10 +231,14 @@
 
         {% if deposits %}
         {% for deposit in deposits %}
+        {% set is_completed = deposit.status == 'completed' %}
+        {% set is_pending = deposit.status == 'pending' %}
         <div class="deposit-card">
             <div class="card-top">
                 <span class="amount">+NGN{{ "{:,.0f}".format(deposit.amount) }}</span>
-                <span class="status status-{{ deposit.status }}">{{ deposit.status }}</span>
+                <span class="status status-{{ 'completed' if is_completed else 'pending' if is_pending else deposit.status }}">
+                    {% if is_completed %}completed{% elif is_pending %}pending{% else %}{{ deposit.status }}{% endif %}
+                </span>
             </div>
 
             {% if deposit.description %}

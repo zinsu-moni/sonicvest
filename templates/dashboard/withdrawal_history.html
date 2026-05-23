@@ -256,10 +256,13 @@
 
         {% if withdrawals %}
         {% for withdrawal in withdrawals %}
+        {% set is_completed = withdrawal.status in ['completed', 'approved', 'processed'] %}
         <div class="withdrawal-card">
             <div class="card-top">
                 <span class="amount">-NGN{{ withdrawal.amount | format_number }}</span>
-                <span class="status status-{{ withdrawal.status }}">{{ withdrawal.status }}</span>
+                <span class="status status-{{ 'completed' if is_completed else withdrawal.status }}">
+                    {{ 'completed' if is_completed else withdrawal.status }}
+                </span>
             </div>
 
             <div class="meta">

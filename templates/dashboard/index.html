@@ -548,7 +548,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" data-claim-bonus-url="{{ url_for('claim_bonus') }}">
         <!-- Header -->
         <div class="header">
             <div class="header-left">
@@ -679,6 +679,9 @@
         </div>
         <div class="notifications-list">
             {% for transaction in recent_transactions[:3] %}
+            {% set is_completed = transaction.status == 'completed' %}
+            {% set is_withdrawal_success = transaction.type == 'withdrawal' and transaction.status in ['completed', 'approved', 'processed'] %}
+            {% set is_pending = transaction.status == 'pending' %}
             <div class="notification-item">
                 <div class="notification-icon">
                     <i class="fas fa-{{ 'arrow-down' if transaction.type in ['deposit', 'package_income', 'daily_bonus', 'referral_bonus'] else 'arrow-up' }}"></i>
@@ -686,8 +689,16 @@
                 <div class="notification-content">
                     <div class="notification-title">{{ transaction.type.replace('_', ' ').title() }}</div>
                     <div class="notification-message">
-                        {{ transaction.type.title() }} ₦{{ transaction.amount | format_number }}
-                        {% if transaction.type in ['deposit', 'package_income', 'daily_bonus', 'referral_bonus'] %}successfully{% endif %}
+                        {% if transaction.type == 'deposit' %}
+                            Deposit ₦{{ transaction.amount | format_number }}
+                            {% if is_completed %}completed{% elif is_pending %}pending confirmation{% else %}{{ transaction.status|title }}{% endif %}
+                        {% elif transaction.type == 'withdrawal' %}
+                            Withdrawal ₦{{ transaction.amount | format_number }}
+                            {% if is_withdrawal_success %}completed{% elif is_pending %}pending{% else %}{{ transaction.status|title }}{% endif %}
+                        {% else %}
+                            {{ transaction.type.title() }} ₦{{ transaction.amount | format_number }}
+                            {% if is_completed %}successfully{% elif is_pending %}pending{% else %}{{ transaction.status|title }}{% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -730,6 +741,7 @@
         async function claimDailyBonus() {
             const button = document.getElementById('checkinBtn');
             const label = document.getElementById('checkinBtnText');
+            const claimBonusUrl = document.querySelector('.container')?.dataset.claimBonusUrl;
 
             if (!button || !label) {
                 return;
@@ -740,7 +752,7 @@
             label.textContent = 'Checking...';
 
             try {
-                const response = await fetch('{{ url_for('claim_bonus') }}', {
+                const response = await fetch(claimBonusUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

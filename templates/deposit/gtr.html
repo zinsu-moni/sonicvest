@@ -271,6 +271,7 @@
                     <i class="fas fa-shield-alt"></i>
                     Your payment is secured with 256-bit SSL encryption
                 </div>
+
             </div>
         </div>
     </div>
@@ -379,9 +380,14 @@
                     // Decide based on backend response
                     if (data.success) {
                         if (data.payment_url) {
-                            // Redirect to payment page
-                            showLoader('Redirecting...', 'Opening payment page');
-                            setTimeout(() => { window.location.href = data.payment_url; }, 250);
+                            showLoader('Opening payment page...', 'Complete the payment in the current tab');
+
+                            setTimeout(() => {
+                                window.location.href = data.payment_url;
+                            }, 250);
+
+                            hideLoader();
+                            showToast('Payment opened in the current tab. Finish payment there and return to the site once complete.', 'success');
                         } else {
                             // Fallback - should not happen in normal flow
                             showLoaderSuccess('Deposit successful!', `₦${amount.toLocaleString()} added to your account`);
