@@ -278,6 +278,24 @@
             box-shadow: 0 12px 32px rgba(11,61,46,0.35);
         }
 
+        .submit-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .lock-note {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+            color: #991B1B;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
         /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
@@ -341,6 +359,17 @@
         <div class="balance-card">
             <div class="balance-label">Available Balance</div>
             <div class="balance-amount">₦{{ (current_user.main_balance or 0) | format_number }}</div>
+        </div>
+
+        <div class="notice">
+            <div class="notice-title">
+                <i class="fas fa-clock"></i>
+                Withdrawal Window
+            </div>
+            <div class="notice-text">
+                Withdrawals are available from {{ withdrawal_hours }}.
+                Expected processing time: {{ processing_time }}.
+            </div>
         </div>
 
         <!-- Form -->
@@ -409,10 +438,16 @@
         </div>
 
         <!-- Submit -->
-        <button type="submit" form="withdrawal-form" class="submit-btn">
+        <button type="submit" form="withdrawal-form" class="submit-btn" {% if withdrawal_locked %}disabled{% endif %}>
             <i class="fas fa-paper-plane"></i>
-            Submit Withdrawal Request
+            {% if withdrawal_locked %}Withdrawal Locked{% else %}Submit Withdrawal Request{% endif %}
         </button>
+
+        {% if withdrawal_locked %}
+        <div class="lock-note">
+            Withdrawals are currently locked. Requests will reopen during {{ withdrawal_hours }}.
+        </div>
+        {% endif %}
     </div>
 
     <!-- Bottom Navigation -->

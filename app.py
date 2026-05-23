@@ -46,6 +46,37 @@ def utc_now():
     """Return current UTC time as naive datetime for legacy DB compatibility."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
+
+def format_withdrawal_window(start_hour, end_hour):
+    """Format stored 24-hour withdrawal settings into a readable window."""
+    def format_hour(hour_value):
+        hour = int(hour_value) % 24
+        period = 'AM' if hour < 12 else 'PM'
+        display_hour = hour % 12
+        if display_hour == 0:
+            display_hour = 12
+        return f"{display_hour}{period}"
+
+    return f"{format_hour(start_hour)} - {format_hour(end_hour)}"
+
+
+def is_withdrawal_window_open(start_hour, end_hour, current_hour=None):
+    """Return True when withdrawals are currently allowed."""
+    if current_hour is None:
+        current_hour = datetime.now().hour
+
+    start_hour = int(start_hour) % 24
+    end_hour = int(end_hour) % 24
+    current_hour = int(current_hour) % 24
+
+    if start_hour == end_hour:
+        return False
+
+    if start_hour < end_hour:
+        return start_hour <= current_hour < end_hour
+
+    return current_hour >= start_hour or current_hour < end_hour
+
 # Initialize Flask app with explicit static folder configuration
 app = Flask(__name__,
            static_folder=os.path.join(BASE_DIR, 'static'),
@@ -1568,7 +1599,14 @@ def withdrawal():
     minimum_withdrawal = SYSTEM_SETTINGS['MINIMUM_WITHDRAWAL']
     withdrawal_fee_percentage = SYSTEM_SETTINGS['WITHDRAWAL_FEE_PERCENTAGE']
     processing_time = "24-48 hours"
-    withdrawal_hours = f"{SYSTEM_SETTINGS['WITHDRAWAL_START_TIME']}am - {SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']}pm"
+    withdrawal_hours = format_withdrawal_window(
+        SYSTEM_SETTINGS['WITHDRAWAL_START_TIME'],
+        SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']
+    )
+    withdrawal_locked = not is_withdrawal_window_open(
+        SYSTEM_SETTINGS['WITHDRAWAL_START_TIME'],
+        SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']
+    )
     
     # Get user's pending withdrawals from Withdrawal table
     pending_withdrawals = Withdrawal.query.filter_by(
@@ -1593,6 +1631,7 @@ def withdrawal():
                          withdrawal_fee_percentage=withdrawal_fee_percentage,
                          processing_time=processing_time,
                          withdrawal_hours=withdrawal_hours,
+                         withdrawal_locked=withdrawal_locked,
                          pending_withdrawals=pending_withdrawals,
                          withdrawals=all_withdrawals,
                          total_pending=total_pending,
@@ -1624,12 +1663,22 @@ def request_withdrawal():
     # Use system settings for withdrawal parameters
     minimum_withdrawal = SYSTEM_SETTINGS['MINIMUM_WITHDRAWAL']
     withdrawal_fee_percentage = SYSTEM_SETTINGS['WITHDRAWAL_FEE_PERCENTAGE']
-    withdrawal_hours = f"{SYSTEM_SETTINGS['WITHDRAWAL_START_TIME']}am - {SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']}pm"
+    withdrawal_hours = format_withdrawal_window(
+        SYSTEM_SETTINGS['WITHDRAWAL_START_TIME'],
+        SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']
+    )
+    withdrawal_locked = not is_withdrawal_window_open(
+        SYSTEM_SETTINGS['WITHDRAWAL_START_TIME'],
+        SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']
+    )
     
     return render_template('withdrawal/request.html', 
                          current_user=user,
                          SYSTEM_SETTINGS=SYSTEM_SETTINGS,
-                         require_package=require_package)
+                         require_package=require_package,
+                         processing_time="24-48 hours",
+                         withdrawal_hours=withdrawal_hours,
+                         withdrawal_locked=withdrawal_locked)
 
 @app.route('/transactions')
 @require_login
@@ -2378,6 +2427,19 @@ def process_withdrawal():
         # For non-JSON submissions, still show a friendly page-level modal via the request page
         flash('You must buy an active package before you can withdraw.', 'error')
         return redirect(url_for('request_withdrawal'))
+
+    if not is_withdrawal_window_open(
+        SYSTEM_SETTINGS['WITHDRAWAL_START_TIME'],
+        SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']
+    ):
+        lock_message = (
+            f"Withdrawals are currently locked. The gateway is available only between "
+            f"{format_withdrawal_window(SYSTEM_SETTINGS['WITHDRAWAL_START_TIME'], SYSTEM_SETTINGS['WITHDRAWAL_END_TIME'])}."
+        )
+        if request.is_json:
+            return jsonify({'success': False, 'message': lock_message})
+        flash(lock_message, 'error')
+        return redirect(url_for('withdrawal'))
     
     try:
         # Handle JSON data
