@@ -48,16 +48,10 @@ def utc_now():
 
 
 def format_withdrawal_window(start_hour, end_hour):
-    """Format stored 24-hour withdrawal settings into a readable window."""
-    def format_hour(hour_value):
-        hour = int(hour_value) % 24
-        period = 'AM' if hour < 12 else 'PM'
-        display_hour = hour % 12
-        if display_hour == 0:
-            display_hour = 12
-        return f"{display_hour}{period}"
-
-    return f"{format_hour(start_hour)} - {format_hour(end_hour)}"
+    """Format stored 24-hour withdrawal settings to match the admin panel."""
+    start_hour = int(start_hour) % 24
+    end_hour = int(end_hour) % 24
+    return f"{start_hour:02d}:00 - {end_hour:02d}:00"
 
 
 def is_withdrawal_window_open(start_hour, end_hour, current_hour=None):
