@@ -1,0 +1,90 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Gateway Withdrawal - SONICVEST Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h2 class="mb-1">Gateway Withdrawal</h2>
+        <p class="text-muted mb-0">Submit a direct payout request to the gateway from the admin panel.</p>
+    </div>
+    <div class="text-end">
+        <div class="small text-muted">Transfer limits</div>
+        <div class="fw-semibold">₦{{ '%.0f'|format(transfer_limits.min_amount) }} - ₦{{ '%.0f'|format(transfer_limits.max_amount) }}</div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="form-container">
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Amount</label>
+                        <input type="number" step="0.01" min="{{ transfer_limits.min_amount }}" max="{{ transfer_limits.max_amount }}" class="form-control" name="amount" placeholder="100.00" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Transfer ID</label>
+                        <input type="text" class="form-control" name="transfer_id" value="{{ suggested_transfer_id }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Bank Code</label>
+                        <input type="text" class="form-control" name="bank_code" value="{{ default_bank_code }}" placeholder="NGR044" required>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Recipient Name</label>
+                        <input type="text" class="form-control" name="receive_name" placeholder="Recipient full name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Recipient Account</label>
+                        <input type="text" class="form-control" name="receive_account" placeholder="Bank account number" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Apply Date</label>
+                        <input type="text" class="form-control" name="apply_date" value="{{ default_apply_date }}" placeholder="YYYY-MM-DD HH:MM:SS">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Remark</label>
+                        <textarea class="form-control" name="remark" rows="3" placeholder="Optional payout note"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Back URL</label>
+                        <input type="url" class="form-control" name="back_url" placeholder="https://your-site.com/admin/gateway-withdrawal">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Submit Gateway Withdrawal</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="stats-card">
+            <h5 class="mb-3">Response</h5>
+            {% if transfer_result %}
+                <div class="mb-3">
+                    <span class="badge {% if transfer_result.success %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ 'Success' if transfer_result.success else 'Failed' }}
+                    </span>
+                </div>
+                <div class="small text-muted mb-2">Message</div>
+                <div class="mb-3">{{ transfer_result.message }}</div>
+                <div class="small text-muted mb-2">Details</div>
+                <pre class="bg-light border rounded p-3 small mb-0" style="white-space: pre-wrap; word-break: break-word;">{{ transfer_result | tojson(indent=2) }}</pre>
+            {% else %}
+                <p class="text-muted mb-0">No transfer has been submitted yet. Fill out the form to send a payout request.</p>
+            {% endif %}
+        </div>
+
+        <div class="stats-card">
+            <h5 class="mb-3">Notes</h5>
+            <ul class="mb-0 ps-3">
+                <li>This page is restricted to authenticated admins.</li>
+                <li>The gateway limits are enforced before the request is sent.</li>
+                <li>The provider response is shown here for quick verification.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

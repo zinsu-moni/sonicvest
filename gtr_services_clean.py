@@ -17,6 +17,10 @@ class GTRPayService:
             self.enabled = GTR_CONFIG.get('ENABLED', True)
             self.min_amount = float(GTR_CONFIG.get('MIN_AMOUNT', 500.0) or 0.0)
             self.max_amount = float(GTR_CONFIG.get('MAX_AMOUNT', 10000000.0) or 0.0)
+            self.transfer_secret_key = GTR_CONFIG.get('TRANSFER_SECRET_KEY', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+            self.transfer_base_url = GTR_CONFIG.get('TRANSFER_BASE_URL', 'https://api.nekpayment.com/pay/transfer')
+            self.transfer_min_amount = float(GTR_CONFIG.get('TRANSFER_MIN_AMOUNT', 1.0) or 0.0)
+            self.transfer_max_amount = float(GTR_CONFIG.get('TRANSFER_MAX_AMOUNT', 100.0) or 0.0)
         except ImportError:
             print('⚠️ GTR Config not found - using defaults')
             self.mch_id = mch_id or '999300111'
@@ -27,6 +31,10 @@ class GTRPayService:
             self.enabled = True
             self.min_amount = 500.0
             self.max_amount = 100000000.0
+            self.transfer_secret_key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            self.transfer_base_url = 'https://api.nekpayment.com/pay/transfer'
+            self.transfer_min_amount = 1.0
+            self.transfer_max_amount = 100.0
 
     def build_sign_digest(self, data, secret_key):
         """Build the documented MD5 signature string."""
@@ -203,3 +211,89 @@ class GTRPayService:
                 'success': False,
                 'message': f'Error verifying callback: {str(e)}',
             }
+
+    def create_transfer_payment(
+        self,
+        amount=None,
+        transfer_id=None,
+        bank_code=None,
+        receive_name=None,
+        receive_account=None,
+        remark=None,
+        back_url=None,
+        apply_date=None,
+    ):
+        """Create a direct transfer via the NekPayment payout API."""
+        try:
+            if not self.enabled:
+                return {'success': False, 'message': 'GTR Pay is not enabled'}
+
+            amount_value = float(amount)
+            if self.transfer_min_amount and amount_value < self.transfer_min_amount:
+                return {'success': False, 'message': f'Minimum transfer amount is ₦{self.transfer_min_amount:,.0f}'}
+            if self.transfer_max_amount and amount_value > self.transfer_max_amount:
+                return {'success': False, 'message': f'Maximum transfer amount is ₦{self.transfer_max_amount:,.0f}'}
+
+            apply_date_value = apply_date or datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            transfer_id_value = transfer_id or f'GW{datetime.now().strftime("%m%d%H%M%S")}'
+
+            request_data = {
+                'sign_type': 'MD5',
+                'mch_id': str(self.mch_id),
+                'mch_transferId': str(transfer_id_value),
+                'transfer_amount': f'{amount_value:.2f}',
+                'apply_date': apply_date_value,
+                'bank_code': str(bank_code or self.bank_code),
+                'receive_name': str(receive_name or ''),
+                'receive_account': str(receive_account or ''),
+            }
+
+            if remark:
+                request_data['remark'] = str(remark)
+            if back_url:
+                request_data['back_url'] = str(back_url)
+
+            request_data['sign'] = self.build_sign_digest(request_data, self.transfer_secret_key)
+
+            print(f'🔄 GTR Transfer API Request: {self.transfer_base_url}')
+            print(f'📊 Transfer Request Data: {request_data}')
+
+            response = requests.post(
+                self.transfer_base_url,
+                data=request_data,
+                headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                timeout=30,
+            )
+
+            print(f'📥 GTR Transfer Response Status: {response.status_code}')
+            print(f'📄 GTR Transfer Response: {response.text}')
+
+            if response.status_code != 200:
+                return {'success': False, 'message': f'API request failed with status {response.status_code}'}
+
+            try:
+                result = response.json()
+            except Exception:
+                return {'success': False, 'message': f'Invalid JSON response: {response.text}'}
+
+            resp_code = str(result.get('respCode') or result.get('code') or '')
+            if resp_code != 'SUCCESS':
+                return {
+                    'success': False,
+                    'message': result.get('errorMsg') or result.get('tradeMsg') or result.get('msg') or 'Failed to create transfer',
+                    'raw_response': result,
+                }
+
+            return {
+                'success': True,
+                'message': result.get('errorMsg') or 'Transfer request accepted',
+                'transfer_id': transfer_id_value,
+                'trade_no': result.get('tradeNo') or result.get('trade_no'),
+                'trade_result': result.get('tradeResult'),
+                'amount': result.get('transferAmount') or f'{amount_value:.2f}',
+                'apply_date': result.get('applyDate') or apply_date_value,
+                'raw_response': result,
+            }
+        except Exception as e:
+            print(f'❌ GTR Transfer Error: {str(e)}')
+            return {'success': False, 'message': f'Error creating transfer: {str(e)}'}

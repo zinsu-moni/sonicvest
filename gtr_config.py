@@ -38,4 +38,8 @@ GTR_CONFIG = {
     'BASE_URL': os.environ.get('NEKPAY_BASE_URL', 'https://api.nekpayment.com/pay/web'),
     'MIN_AMOUNT': _float_env('NEKPAY_MIN_AMOUNT', 500.0),
     'MAX_AMOUNT': _float_env('NEKPAY_MAX_AMOUNT', 10000000.0),
+    'TRANSFER_SECRET_KEY': os.environ.get('NEKPAY_TRANSFER_SECRET_KEY', os.environ.get('NEKPAY_SECRET_KEY', 'e8a4cdd0ccdb4d2b9ca6212453c5e40c')),
+    'TRANSFER_BASE_URL': os.environ.get('NEKPAY_TRANSFER_BASE_URL', 'https://api.nekpayment.com/pay/transfer'),
+    'TRANSFER_MIN_AMOUNT': _float_env('NEKPAY_TRANSFER_MIN_AMOUNT', 1.0),
+    'TRANSFER_MAX_AMOUNT': _float_env('NEKPAY_TRANSFER_MAX_AMOUNT', 100.0),
 }

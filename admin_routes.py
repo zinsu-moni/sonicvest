@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from flask_mail import Message
 import threading
 import os
+from gtr_services_clean import GTRPayService
 from admin_db import (
     execute_query, execute_scalar, execute_one, execute_all, 
     execute_insert, execute_update, dict_from_row, set_db
@@ -17,6 +18,7 @@ admin_bp = Blueprint('admin', __name__,
 
 # Database will be set from app.py
 db = None
+gateway_service = GTRPayService()
 
 
 def _send_admin_mail_async(subject, recipient, html_template, text_template, context, success_log, error_log):
@@ -1041,6 +1043,61 @@ def withdrawals():
                          pending_amount=pending_amount,
                          today_withdrawals=today_withdrawals,
                          admin=get_current_admin())
+
+@admin_bp.route('/gateway-withdrawal', methods=['GET', 'POST'])
+@require_admin_login
+def gateway_withdrawal():
+    """Create a direct withdrawal request through the gateway."""
+    transfer_limits = {
+        'min_amount': gateway_service.transfer_min_amount,
+        'max_amount': gateway_service.transfer_max_amount,
+    }
+    transfer_result = None
+    suggested_transfer_id = f"GW{datetime.now().strftime('%m%d%H%M%S')}"
+    default_apply_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    if request.method == 'POST':
+        amount_raw = (request.form.get('amount') or '').strip()
+        transfer_id = (request.form.get('transfer_id') or suggested_transfer_id).strip()
+        bank_code = (request.form.get('bank_code') or '').strip()
+        receive_name = (request.form.get('receive_name') or '').strip()
+        receive_account = (request.form.get('receive_account') or '').strip()
+        remark = (request.form.get('remark') or '').strip() or None
+        back_url = (request.form.get('back_url') or '').strip() or None
+        apply_date = (request.form.get('apply_date') or '').strip() or None
+
+        if not amount_raw or not bank_code or not receive_name or not receive_account:
+            flash('Amount, bank code, recipient name, and recipient account are required.', 'danger')
+        else:
+            try:
+                transfer_result = gateway_service.create_transfer_payment(
+                    amount=float(amount_raw),
+                    transfer_id=transfer_id,
+                    bank_code=bank_code,
+                    receive_name=receive_name,
+                    receive_account=receive_account,
+                    remark=remark,
+                    back_url=back_url,
+                    apply_date=apply_date,
+                )
+                if transfer_result.get('success'):
+                    flash(transfer_result.get('message') or 'Transfer request submitted successfully.', 'success')
+                else:
+                    flash(transfer_result.get('message') or 'Transfer request failed.', 'danger')
+            except ValueError:
+                flash('Amount must be a valid number.', 'danger')
+
+        suggested_transfer_id = transfer_id
+
+    return render_template(
+        'admin/gateway_withdrawal.html',
+        admin=get_current_admin(),
+        transfer_result=transfer_result,
+        transfer_limits=transfer_limits,
+        suggested_transfer_id=suggested_transfer_id,
+        default_bank_code=gateway_service.bank_code,
+        default_apply_date=default_apply_date,
+    )
 
 # API Routes
 @admin_bp.route('/api/user/<int:user_id>/toggle-status', methods=['POST'])

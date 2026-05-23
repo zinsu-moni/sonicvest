@@ -307,6 +307,10 @@
                 href="{{ url_for('admin.withdrawals') }}">
                 <i class="fas fa-money-bill-wave me-2"></i>Withdrawals
             </a>
+            <a class="nav-link {% if request.endpoint == 'admin.gateway_withdrawal' %}active{% endif %}"
+                href="{{ url_for('admin.gateway_withdrawal') }}">
+                <i class="fas fa-building-columns me-2"></i>Gateway Withdrawal
+            </a>
             <a class="nav-link {% if request.endpoint == 'admin.settings' %}active{% endif %}"
                 href="{{ url_for('admin.settings') }}">
                 <i class="fas fa-cog me-2"></i>Settings
