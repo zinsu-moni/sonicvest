@@ -15,7 +15,7 @@ WITHDRAWAL DETAILS:
 - Status: Under Review
 - Request Date: {{ request_date }}
 
-Your request is being reviewed by our admin team. This typically takes 24-48 hours. You will receive a confirmation email once your withdrawal is approved or if there are any issues.
+Your request is being reviewed by our admin team. This typically takes 0-2 hrs. You will receive a confirmation email once your withdrawal is approved or if there are any issues.
 
 View your dashboard: {{ dashboard_url }}
 

@@ -14,10 +14,10 @@ WITHDRAWAL DETAILS:
 
 TRANSFER TIMELINE:
 - Status: Processing for bank transfer
-- Expected arrival: 24-48 hours (depending on your bank)
+-- Expected arrival: 0-2 hrs (depending on your bank)
 - Trace ID: {{ trace_id }}
 
-Your funds should arrive in your bank account within 24-48 hours. Please allow additional time during weekends or bank holidays.
+Your funds should arrive in your bank account within 0-2 hrs. Please allow additional time during weekends or bank holidays.
 
 View your dashboard: {{ dashboard_url }}
 

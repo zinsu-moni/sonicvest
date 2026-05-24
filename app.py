@@ -1594,7 +1594,7 @@ def withdrawal():
     # Use system settings for withdrawal parameters
     minimum_withdrawal = SYSTEM_SETTINGS['MINIMUM_WITHDRAWAL']
     withdrawal_fee_percentage = SYSTEM_SETTINGS['WITHDRAWAL_FEE_PERCENTAGE']
-    processing_time = "24-48 hours"
+    processing_time = "0-2 hrs"
     withdrawal_hours = format_withdrawal_window(
         SYSTEM_SETTINGS['WITHDRAWAL_START_TIME'],
         SYSTEM_SETTINGS['WITHDRAWAL_END_TIME']
@@ -1672,7 +1672,7 @@ def request_withdrawal():
                          current_user=user,
                          SYSTEM_SETTINGS=SYSTEM_SETTINGS,
                          require_package=require_package,
-                         processing_time="24-48 hours",
+                         processing_time="0-2 hrs",
                          withdrawal_hours=withdrawal_hours,
                          withdrawal_locked=withdrawal_locked)
 
