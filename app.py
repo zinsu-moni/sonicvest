@@ -1147,6 +1147,7 @@ def login():
         
         if user and check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
+            session['show_whatsapp_popup'] = True
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -1164,6 +1165,8 @@ def logout():
 @require_login
 def dashboard():
     user = get_current_user()
+    show_whatsapp_popup = session.pop('show_whatsapp_popup', False)
+    whatsapp_channel_url = (os.environ.get('WHATSAPP_CHANNEL_URL') or '').strip()
     
     # Get packages for display
     packages = Package.query.filter_by(is_active=True).all()
@@ -1218,7 +1221,9 @@ def dashboard():
                          daily_income=daily_income,
                          daily_cashback=daily_cashback,
                          income_scheduler_status=income_scheduler_status,
-                         recent_transactions=recent_transactions)
+                         recent_transactions=recent_transactions,
+                         show_whatsapp_popup=show_whatsapp_popup,
+                         whatsapp_channel_url=whatsapp_channel_url)
 
 @app.route('/packages')
 def packages():
