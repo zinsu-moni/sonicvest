@@ -984,7 +984,7 @@ def withdrawals():
     try:
         withdrawals_raw = conn.execute('''
             SELECT w.id, w.amount, w.fee, w.net_amount, w.status, w.created_at, 
-                   w.bank_name, w.account_number, w.account_name,
+                   w.bank_name, w.other_bank, w.account_number, w.account_name,
                    u.name as username, u.email
             FROM withdrawal w
             LEFT JOIN "user" u ON w.user_id = u.id
@@ -1006,6 +1006,7 @@ def withdrawals():
                 'status': withdrawal['status'],
                 'created_at': created_at,
                 'bank_name': withdrawal['bank_name'],
+                'other_bank': withdrawal['other_bank'],
                 'account_number': withdrawal['account_number'],
                 'account_name': withdrawal['account_name'],
                 'user': user_obj

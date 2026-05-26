@@ -354,6 +354,7 @@
         <tbody>
             {% for withdrawal in withdrawals %}
             <tr class="withdrawal-row" data-status="{{ withdrawal.status }}">
+                {% set display_bank_name = withdrawal.other_bank if withdrawal.other_bank and withdrawal.other_bank != 'Other' else withdrawal.bank_name if withdrawal.bank_name and withdrawal.bank_name != 'Other' else 'Not provided' %}
                 <td>
                     <div class="user-info">
                         <div class="user-avatar">
@@ -370,7 +371,7 @@
                 </td>
                 <td>
                     <div class="bank-info">
-                        <div class="bank-name">{{ withdrawal.bank_name or 'Not provided' }}</div>
+                        <div class="bank-name">{{ display_bank_name }}</div>
                         <div class="account-number">{{ withdrawal.account_number or 'Not provided' }}</div>
                     </div>
                 </td>

@@ -451,6 +451,7 @@ def initialize_database():
             print("✅ Database tables ensured")
 
             ensure_system_settings_schema()
+            ensure_withdrawal_schema()
             
             # Load system settings from DB
             SYSTEM_SETTINGS = load_system_settings()
@@ -930,6 +931,7 @@ class Withdrawal(db.Model):
     fee = db.Column(db.Float, nullable=False)
     net_amount = db.Column(db.Float, nullable=False)
     bank_name = db.Column(db.String(100), nullable=False)
+    other_bank = db.Column(db.String(100), nullable=True)
     account_number = db.Column(db.String(50), nullable=False)
     account_name = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected, processed
@@ -1026,6 +1028,19 @@ def ensure_system_settings_schema():
         message = str(e).lower()
         if 'duplicate column' not in message and 'already exists' not in message:
             print(f"⚠️  System settings schema check: {e}")
+
+def ensure_withdrawal_schema():
+    """Add missing withdrawal columns on existing databases."""
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE withdrawal ADD COLUMN other_bank VARCHAR(100)"))
+        db.session.commit()
+        print("✅ Withdrawal custom bank column ensured")
+    except Exception as e:
+        db.session.rollback()
+        message = str(e).lower()
+        if 'duplicate column' not in message and 'already exists' not in message:
+            print(f"⚠️  Withdrawal schema check: {e}")
 
 # Helper functions
 def get_current_user():
@@ -2621,19 +2636,37 @@ def process_withdrawal():
         if request.is_json:
             data = request.get_json()
             amount = data.get('amount')
-            bank_name = data.get('bank_name')
+            selected_bank_name = data.get('bank_name')
+            other_bank = data.get('other_bank', '')
             account_number = data.get('account_number')
             account_name = data.get('account_name')
             purpose = data.get('purpose', '')
         else:
             # Handle form data (fallback)
             amount = request.form.get('amount')
-            bank_name = request.form.get('bank_name')
+            selected_bank_name = request.form.get('bank_name')
+            other_bank = request.form.get('other_bank', '')
             account_number = request.form.get('account_number')
             account_name = request.form.get('account_name')
             purpose = request.form.get('purpose', '')
+
+        if isinstance(selected_bank_name, str):
+            selected_bank_name = selected_bank_name.strip()
+
+        if selected_bank_name == 'Other':
+            if not other_bank:
+                if request.is_json:
+                    return jsonify({'success': False, 'message': 'Please specify the bank name'})
+                flash('Please specify the bank name', 'error')
+                return redirect(url_for('request_withdrawal'))
+            display_bank_name = other_bank.strip()
+        else:
+            display_bank_name = selected_bank_name
+
+        if isinstance(other_bank, str):
+            other_bank = other_bank.strip()
         
-        if not all([amount, bank_name, account_number, account_name]):
+        if not all([amount, selected_bank_name, account_number, account_name]):
             if request.is_json:
                 return jsonify({'success': False, 'message': 'All fields are required'})
             flash('All fields are required', 'error')
@@ -2672,7 +2705,8 @@ def process_withdrawal():
                 amount=amount,
                 fee=fee,
                 net_amount=net_amount,
-                bank_name=bank_name,
+                bank_name=selected_bank_name,
+                other_bank=display_bank_name if selected_bank_name == 'Other' else None,
                 account_number=account_number,
                 account_name=account_name,
                 status='pending'
@@ -2695,17 +2729,17 @@ def process_withdrawal():
             db.session.commit()
 
             send_withdrawal_requested_email(
-                user_name=user.name,
-                user_email=user.email,
-                amount=amount,
-                fee=fee,
-                fee_percentage=fee_percentage,
-                net_amount=net_amount,
-                bank_name=bank_name,
-                account_number=account_number,
-                account_name=account_name,
-                request_date=withdrawal.created_at.strftime('%Y-%m-%d %H:%M UTC') if withdrawal.created_at else utc_now().strftime('%Y-%m-%d %H:%M UTC'),
-                dashboard_url=build_public_url('dashboard'),
+                user.name,
+                user.email,
+                amount,
+                fee,
+                fee_percentage,
+                net_amount,
+                display_bank_name,
+                account_number,
+                account_name,
+                withdrawal.created_at.strftime('%Y-%m-%d %H:%M UTC') if withdrawal.created_at else utc_now().strftime('%Y-%m-%d %H:%M UTC'),
+                build_public_url('dashboard'),
             )
             
             if request.is_json:
@@ -2948,16 +2982,32 @@ def admin_packages():
 @require_admin
 def admin_withdrawals():
     """Admin withdrawals management"""
-    page = request.args.get('page', 1, type=int)
     status = request.args.get('status', 'pending')
-    
-    query = Transaction.query.filter(Transaction.type == 'withdrawal')
-    if status:
-        query = query.filter(Transaction.status == status)
-    
-    withdrawals = query.order_by(Transaction.created_at.desc()).paginate(
-        page=page, per_page=20, error_out=False
-    )
+
+    query = Withdrawal.query
+    if status and status != 'all':
+        if status == 'completed':
+            query = query.filter(Withdrawal.status.in_(['approved', 'processed', 'completed']))
+        else:
+            query = query.filter(Withdrawal.status == status)
+
+    withdrawals_raw = query.order_by(Withdrawal.created_at.desc()).all()
+
+    withdrawals = []
+    for withdrawal in withdrawals_raw:
+        display_status = 'completed' if withdrawal.status in ['approved', 'processed'] else withdrawal.status
+        withdrawals.append(type('WithdrawalView', (), {
+            'id': withdrawal.id,
+            'amount': withdrawal.amount,
+            'net_amount': withdrawal.net_amount,
+            'status': display_status,
+            'created_at': withdrawal.created_at,
+            'bank_name': withdrawal.bank_name,
+            'other_bank': withdrawal.other_bank,
+            'account_number': withdrawal.account_number,
+            'account_name': withdrawal.account_name,
+            'user': withdrawal.user,
+        })())
     
     return render_template('admin/withdrawals.html', 
                          withdrawals=withdrawals,
@@ -3582,6 +3632,7 @@ if __name__ == '__main__':
             # Try to create all tables
             db.create_all()
             ensure_system_settings_schema()
+            ensure_withdrawal_schema()
             
             # Initialize admin database
             from admin_routes import init_admin_db

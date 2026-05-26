@@ -50,10 +50,11 @@
 			<tbody>
 				{% for w in withdrawals %}
 				<tr>
+					{% set display_bank_name = w.other_bank if w.other_bank and w.other_bank != 'Other' else w.bank_name if w.bank_name and w.bank_name != 'Other' else 'N/A' %}
 					<td>#{{ w.id }}</td>
 					<td>{{ w.user.username if w.user else 'Unknown' }}</td>
 					<td>
-						<div>{{ w.bank_name or 'N/A' }}</div>
+						<div>{{ display_bank_name }}</div>
 						<div>{{ w.account_name or 'N/A' }}</div>
 						<div class="d-flex align-items-center gap-2">
 							<span>{{ w.account_number or 'N/A' }}</span>
