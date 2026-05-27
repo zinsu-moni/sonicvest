@@ -614,15 +614,16 @@
     {% if show_whatsapp_popup %}
     <div class="popup-overlay" id="whatsappPopup" role="dialog" aria-modal="true" aria-labelledby="whatsappPopupTitle">
         <div class="popup-card">
-            <h2 class="popup-title" id="whatsappPopupTitle">Join our WhatsApp channel</h2>
-            <p class="popup-text">Stay updated with announcements, support updates, and quick investment tips. Join our official WhatsApp channel now.</p>
+            <h2 class="popup-title" id="whatsappPopupTitle">Join our community channels</h2>
+            <p class="popup-text">Stay updated with announcements, support updates, and quick investment tips in our official WhatsApp and Telegram channels.</p>
             <div class="popup-actions">
                 <button type="button" class="popup-btn popup-btn-secondary" id="dismissWhatsappPopup">Later</button>
                 {% if whatsapp_channel_url %}
-                <a href="{{ whatsapp_channel_url }}" target="_blank" rel="noopener noreferrer" class="popup-btn popup-btn-primary">Join now</a>
+                <a href="{{ whatsapp_channel_url }}" target="_blank" rel="noopener noreferrer" class="popup-btn popup-btn-primary">WhatsApp</a>
                 {% else %}
-                <button type="button" class="popup-btn popup-btn-primary" id="joinWhatsappNoUrl">Join now</button>
+                <button type="button" class="popup-btn popup-btn-primary" id="joinWhatsappNoUrl">WhatsApp</button>
                 {% endif %}
+                <a href="https://t.me/+iqMcCurjbis0NGI8" target="_blank" rel="noopener noreferrer" class="popup-btn popup-btn-primary">Telegram</a>
             </div>
         </div>
     </div>
