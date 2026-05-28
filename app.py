@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from dotenv import load_dotenv
 import os
 import secrets
@@ -47,17 +48,35 @@ def utc_now():
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def _load_withdrawal_timezone():
+    """Return the timezone used for withdrawal window checks."""
+    timezone_name = os.environ.get('WITHDRAWAL_TIMEZONE', 'Africa/Lagos')
+    try:
+        return ZoneInfo(timezone_name)
+    except ZoneInfoNotFoundError:
+        return timezone.utc
+
+
+WITHDRAWAL_TIMEZONE = _load_withdrawal_timezone()
+
+
 def format_withdrawal_window(start_hour, end_hour):
     """Format stored 24-hour withdrawal settings to match the admin panel."""
     start_hour = int(start_hour) % 24
     end_hour = int(end_hour) % 24
-    return f"{start_hour:02d}:00 - {end_hour:02d}:00"
+    timezone_label = datetime.now(WITHDRAWAL_TIMEZONE).tzname() or WITHDRAWAL_TIMEZONE.key
+    return f"{start_hour:02d}:00 - {end_hour:02d}:00 {timezone_label}"
+
+
+def current_withdrawal_hour():
+    """Return the current hour in the configured withdrawal timezone."""
+    return datetime.now(WITHDRAWAL_TIMEZONE).hour
 
 
 def is_withdrawal_window_open(start_hour, end_hour, current_hour=None):
     """Return True when withdrawals are currently allowed."""
     if current_hour is None:
-        current_hour = datetime.now().hour
+        current_hour = current_withdrawal_hour()
 
     start_hour = int(start_hour) % 24
     end_hour = int(end_hour) % 24
